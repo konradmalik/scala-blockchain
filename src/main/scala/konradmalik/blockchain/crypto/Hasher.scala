@@ -17,16 +17,11 @@ class Hasher(private val hashingAlgorithm: HashingAlgorithm) {
     hashingAlgorithm.hash(input)
   }
 
-  def hash(input: AnyVal): HexString = {
+  def hash(input: Any): HexString = {
     hashingAlgorithm.hash(Serialization.serialize(input))
   }
 
-  def hashMany(inputs: Iterable[AnyVal]): HexString = {
-    hash(inputs.map(hash).reduce(_ + _))
-  }
-
-
-  def hashMany(inputs: AnyVal*): HexString = {
+  def hashMany(inputs: Any*): HexString = {
     hash(inputs.map(hash).reduce(_ + _))
   }
 }

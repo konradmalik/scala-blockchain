@@ -1,11 +1,13 @@
 package konradmalik.blockchain.core
 
+import konradmalik.blockchain._
 import java.beans.Transient
 import java.util.Calendar
 
 import konradmalik.blockchain.crypto.Hasher
 import konradmalik.blockchain.{HexString, Transactions}
-import org.json4s.Extraction
+import org.json4s.native.JsonMethods.{compact, render}
+import org.json4s.{Extraction, JValue}
 
 class Block(val hasher: Hasher,
             val index: Long,
@@ -32,7 +34,10 @@ class Block(val hasher: Hasher,
   }
 
   /** String representation of the block */
-  def toJson: String = Extraction.decompose(this).toString
+  def toJson: JValue = Extraction.decompose(this)
+
+  override def toString: String = compact(render(toJson))
+
 
 }
 
