@@ -1,14 +1,19 @@
 package konradmalik.blockchain.core
 
-import konradmalik.blockchain.{Chain, Transactions}
+import konradmalik.blockchain.Chain
 import konradmalik.blockchain.crypto.Hasher
+import konradmalik.blockchain.protocols.ProofProtocol
 
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 
-class Blockchain(difficulty: Int, proof: ProofProtocol, hasher: Hasher) {
+class Blockchain(proof: ProofProtocol, hasher: Hasher) {
 
-  private val chain: Chain = new Chain
+  // add genesis
+  private val genesis = validateBlock(Block(hasher, 0L, "0" * 64, "Genesis", 0))
+
+  private val chain: Chain = ListBuffer[Block](genesis)
 
   private def addBlock(block: Block): Unit = {
     chain.append(block)
@@ -25,20 +30,16 @@ class Blockchain(difficulty: Int, proof: ProofProtocol, hasher: Hasher) {
     val shiftedPairs: mutable.Seq[(Block, Block)] = chain.dropRight(1) zip chain.tail
     shiftedPairs.forall {
       case (prevB: Block, nextB: Block) =>
-        proof.isBlockValid(prevB) &&
-          proof.isBlockValid(nextB) &&
-          hashBlock(prevB).equals(nextB.previousHash) &&
+        proof.isBlockProven(prevB) &&
+          proof.isBlockProven(nextB) &&
+          prevB.hashBlock.equals(nextB.previousHash) &&
           prevB.index + 1 == nextB.index
     }
 
   }
 
-  def hashBlock(block: Block): String = hasher.hash(block.toJson)
-
-  def mineBlock(newData: String, transactions: Transactions) = {
-    // use arguments to call Block.mine, get pow from the blockchain
-    val lastBlock = getLastBlock
-
+  def validateBlock(block: Block): Block = {
+    proof.proveBlock(block)
   }
 
 

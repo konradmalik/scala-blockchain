@@ -7,7 +7,7 @@ import konradmalik.blockchain.crypto.Hasher
 import konradmalik.blockchain.{HexString, Transactions}
 import org.json4s.Extraction
 
-class Block(hasher: Hasher,
+class Block(val hasher: Hasher,
             val index: Long,
             val previousHash: HexString,
             val data: String,
@@ -15,11 +15,11 @@ class Block(hasher: Hasher,
             val timestamp: Long,
             val nonce: Int,
             @Transient
-            transactions: Transactions) extends Serializable {
+            val transactions: Transactions) extends Serializable {
 
   val hash: HexString = hashBlock
 
-  private def hashBlock: HexString = {
+  def hashBlock: HexString = {
     hasher.hashMany(index, previousHash, data, merkleHash, timestamp, nonce)
   }
 
@@ -27,11 +27,7 @@ class Block(hasher: Hasher,
     hashBlock.equals(hash)
   }
 
-  def hasValidHashWithDifficulty(difficulty: Int): Unit = {
-
-  }
-
-  def hasValidMerkleHash = {
+  def hasValidMerkleHash: Boolean = {
     Merkle.computeRoot(transactions).equals(merkleHash)
   }
 
@@ -42,11 +38,6 @@ class Block(hasher: Hasher,
 
 object Block {
   private val now = Calendar.getInstance()
-
-  // use proof of work to calculate hash by chaning nonce
-  def mine(pow: ProofOfWork, block: Block) = {
-
-  }
 
   def apply(hasher: Hasher, index: Long, previousHash: HexString, data: String, timestamp: Long, nonce: Int, transactions: Transactions): Block =
     new Block(hasher, index, previousHash, data, Merkle.computeRoot(transactions), timestamp, nonce, transactions)

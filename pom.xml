@@ -15,6 +15,7 @@
         <scala.version>2.11.12</scala.version>
         <scala.compat.version>2.11</scala.compat.version>
 
+        <scala.test.version>3.0.5</scala.test.version>
         <json4s.version>3.5.4</json4s.version>
 
         <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
@@ -35,6 +36,16 @@
             <artifactId>json4s-native_2.11</artifactId>
             <version>${json4s.version}</version>
         </dependency>
+
+        <!-- TESTING -->
+        <!-- https://mvnrepository.com/artifact/org.scalatest/scalatest -->
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_${scala.compat.version}</artifactId>
+            <version>${scala.test.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

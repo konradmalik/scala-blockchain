@@ -18,7 +18,7 @@ class Hasher(private val hashingAlgorithm: HashingAlgorithm) {
   }
 
   def hash(input: AnyVal): HexString = {
-    hashingAlgorithm.hash(Serialization.serialise(input))
+    hashingAlgorithm.hash(Serialization.serialize(input))
   }
 
   def hashMany(inputs: Iterable[AnyVal]): HexString = {
