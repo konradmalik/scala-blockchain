@@ -1,16 +1,14 @@
 package konradmalik.blockchain.core
 
-import konradmalik.blockchain._
 import java.beans.Transient
 import java.util.Calendar
 
-import konradmalik.blockchain.crypto.Hasher
-import konradmalik.blockchain.{HexString, Transactions}
+import konradmalik.blockchain.crypto.SHA256
+import konradmalik.blockchain.{HexString, Transactions, _}
 import org.json4s.native.JsonMethods.{compact, render}
 import org.json4s.{Extraction, JValue}
 
-class Block(val hasher: Hasher,
-            val index: Long,
+class Block(val index: Long,
             val previousHash: HexString,
             val data: String,
             val merkleHash: HexString,
@@ -22,7 +20,7 @@ class Block(val hasher: Hasher,
   val hash: HexString = hashBlock
 
   def hashBlock: HexString = {
-    hasher.hashMany(index, previousHash, data, merkleHash, timestamp, nonce)
+    SHA256.hash(index, previousHash, data, merkleHash, timestamp, nonce)
   }
 
   def hasValidHash: Boolean = {
@@ -44,22 +42,22 @@ class Block(val hasher: Hasher,
 object Block {
   private val now = Calendar.getInstance()
 
-  def apply(hasher: Hasher, index: Long, previousHash: HexString, data: String, timestamp: Long, nonce: Int, transactions: Transactions): Block =
-    new Block(hasher, index, previousHash, data, Merkle.computeRoot(transactions), timestamp, nonce, transactions)
+  def apply(index: Long, previousHash: HexString, data: String, timestamp: Long, nonce: Int, transactions: Transactions): Block =
+    new Block(index, previousHash, data, Merkle.computeRoot(transactions), timestamp, nonce, transactions)
 
-  def apply(hasher: Hasher, index: Long, previousHash: HexString, data: String, timestamp: Long, nonce: Int): Block = {
+  def apply(index: Long, previousHash: HexString, data: String, timestamp: Long, nonce: Int): Block = {
     val txs = new Transactions
-    new Block(hasher, index, previousHash, data, Merkle.computeRoot(txs), timestamp, nonce, txs)
+    new Block(index, previousHash, data, Merkle.computeRoot(txs), timestamp, nonce, txs)
   }
 
-  def apply(hasher: Hasher, index: Long, previousHash: HexString, data: String, nonce: Int, transactions: Transactions): Block = {
+  def apply(index: Long, previousHash: HexString, data: String, nonce: Int, transactions: Transactions): Block = {
     val timestamp: Long = now.getTimeInMillis
-    new Block(hasher, index, previousHash, data, Merkle.computeRoot(transactions), timestamp, nonce, transactions)
+    new Block(index, previousHash, data, Merkle.computeRoot(transactions), timestamp, nonce, transactions)
   }
 
-  def apply(hasher: Hasher, index: Long, previousHash: HexString, data: String, nonce: Int): Block = {
+  def apply(index: Long, previousHash: HexString, data: String, nonce: Int): Block = {
     val txs = new Transactions
     val timestamp: Long = now.getTimeInMillis
-    new Block(hasher, index, previousHash, data, Merkle.computeRoot(txs), timestamp, nonce, txs)
+    new Block(index, previousHash, data, Merkle.computeRoot(txs), timestamp, nonce, txs)
   }
 }

@@ -10,8 +10,8 @@ import scala.collection.mutable
 
 package object blockchain {
 
-  implicit val formats = DefaultFormats
-  //implicit val formats: AnyRef with Formats = Serialization.formats(NoTypeHints)
+  //implicit val formats = DefaultFormats
+  implicit val formats: AnyRef with Formats = Serialization.formats(NoTypeHints)
   implicit val defaultCharset: Charset = Charset.forName("UTF-8")
 
   type Bytes = Array[Byte]

@@ -1,17 +1,16 @@
 package konradmalik.blockchain.core
 
 import konradmalik.blockchain.Chain
-import konradmalik.blockchain.crypto.Hasher
 import konradmalik.blockchain.protocols.ProofProtocol
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 
-class Blockchain(proof: ProofProtocol, hasher: Hasher) {
+class Blockchain(proof: ProofProtocol) {
 
   // add genesis
-  private val genesis = validateBlock(Block(hasher, 0L, "0" * 64, "Genesis", 0))
+  private val genesis = validateBlock(Block(0L, "0" * 64, "Genesis", 0))
 
   private val chain: Chain = ListBuffer[Block](genesis)
 

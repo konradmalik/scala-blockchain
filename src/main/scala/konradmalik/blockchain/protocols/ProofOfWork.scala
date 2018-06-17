@@ -10,7 +10,7 @@ class ProofOfWork(difficulty: Int) extends ProofProtocol {
     var provenBlock = block
     while (!isBlockProven(provenBlock)) {
       provenBlock =
-        Block(provenBlock.hasher, provenBlock.index, provenBlock.previousHash,
+        Block(provenBlock.index, provenBlock.previousHash,
           provenBlock.data, provenBlock.timestamp, provenBlock.nonce + 1, provenBlock.transactions)
     }
 
