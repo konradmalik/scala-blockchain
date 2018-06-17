@@ -9,12 +9,12 @@ class ProofOfWorkTest extends FlatSpec with Matchers {
   val block = Block(0, "0" * 64, "Test", 0)
 
   "Proof of work" should "be able to prove blocks" in {
-    assert(!pow.isBlockProven(block))
+    assert(!pow.isBlockValid(block))
     val notProvenHash = block.hash
     notProvenHash should not startWith "000"
 
     val proven = pow.proveBlock(block)
-    assert(pow.isBlockProven(proven))
+    assert(pow.isBlockValid(proven))
     val provenHash = proven.hash
     provenHash should startWith("000")
   }

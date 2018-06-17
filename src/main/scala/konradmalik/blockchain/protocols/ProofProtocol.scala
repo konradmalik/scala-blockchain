@@ -6,6 +6,6 @@ trait ProofProtocol {
 
   def proveBlock(block: Block): Block
 
-  def isBlockProven(block: Block): Boolean
+  def isBlockValid(block: Block): Boolean
 
 }

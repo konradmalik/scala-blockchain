@@ -1,9 +1,9 @@
 package konradmalik.blockchain.core
 
-import konradmalik.blockchain.Chain
 import konradmalik.blockchain.protocols.ProofProtocol
+import konradmalik.blockchain.{Chain, Transactions}
 
-import scala.collection.mutable
+import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
 
@@ -14,36 +14,57 @@ class Blockchain(proof: ProofProtocol) {
 
   private val chain: Chain = ListBuffer[Block](genesis)
 
-  private def addBlock(block: Block): Unit = {
-    chain.append(block)
+  def addBlock(block: Block): Boolean = {
+    if (!isBlockValid(block) || !Blockchain.isValidLinkBetween(getLastBlock, block))
+      false
+    else {
+      chain.append(block)
+      true
+    }
   }
 
-  def createTransaction() = ???
+  def getLastBlock: Block = getBlockchain.last
 
-  def getLastBlock: Block = chain.last
+  def getBlockchain: List[Block] = chain.result()
 
   def isChainValid: Boolean = {
-    if (chain.isEmpty) return false
-    if (chain.length == 1) return true
+    val chain = getBlockchain
 
-    val shiftedPairs: mutable.Seq[(Block, Block)] = chain.dropRight(1) zip chain.tail
-    shiftedPairs.forall {
-      case (prevB: Block, nextB: Block) =>
-        proof.isBlockProven(prevB) &&
-          proof.isBlockProven(nextB) &&
-          prevB.hashBlock.equals(nextB.previousHash) &&
-          prevB.index + 1 == nextB.index
+    @tailrec
+    def checkChain(chain: List[Block]): Boolean = {
+      chain match {
+        case Nil => false
+        case g +: Nil => g.previousHash.equals("0" * 64) && g.index == 0 && isBlockValid(g)
+        case a +: b +: tail => isBlockValid(a) && isBlockValid(b) && Blockchain.isValidLinkBetween(a, b) && checkChain(tail)
+      }
     }
-
+    // start
+    checkChain(chain)
   }
 
   def validateBlock(block: Block): Block = {
     proof.proveBlock(block)
   }
 
+  def isBlockValid(block: Block): Boolean = {
+    proof.isBlockValid(block)
+  }
+
+  def validateAndAddBlock(block: Block): Boolean = {
+    addBlock(validateBlock(block))
+  }
+
+  def createNextBlock(data: String, transactions: Transactions): Block = {
+    val lb = getLastBlock
+    Block(lb.index + 1, lb.hash, data, 0, transactions)
+  }
 
 }
 
 object Blockchain {
+  def isValidLinkBetween(earlier: Block, next: Block): Boolean = {
+    earlier.hash.equals(next.previousHash) && earlier.index + 1 == next.index
+  }
 
 }
+

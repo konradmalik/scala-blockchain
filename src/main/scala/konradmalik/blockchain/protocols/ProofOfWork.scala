@@ -8,7 +8,7 @@ class ProofOfWork(difficulty: Int) extends ProofProtocol {
   override def proveBlock(block: Block): Block = {
 
     var provenBlock = block
-    while (!isBlockProven(provenBlock)) {
+    while (!isBlockValid(provenBlock)) {
       provenBlock =
         Block(provenBlock.index, provenBlock.previousHash,
           provenBlock.data, provenBlock.timestamp, provenBlock.nonce + 1, provenBlock.transactions)
@@ -18,13 +18,13 @@ class ProofOfWork(difficulty: Int) extends ProofProtocol {
   }
 
 
-  private def hashProved(block: Block): Boolean = {
+  private def isHashProved(block: Block): Boolean = {
     val blockHash = block.hash
     blockHash.startsWith("0" * difficulty, 0)
   }
 
-  override def isBlockProven(block: Block): Boolean = {
-    block.hasValidMerkleHash && block.hasValidHash && hashProved(block)
+  override def isBlockValid(block: Block): Boolean = {
+    block.hasValidMerkleHash && block.hasValidHash && isHashProved(block)
   }
 
 }
