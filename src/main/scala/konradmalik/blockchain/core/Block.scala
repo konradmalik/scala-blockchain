@@ -4,9 +4,8 @@ import java.util.Calendar
 
 import konradmalik.blockchain.crypto.SHA256
 import konradmalik.blockchain.{HexString, Transactions, _}
-import org.json4s.JsonAST.{JField, JObject, JString}
 import org.json4s.native.JsonMethods.{compact, render}
-import org.json4s.{CustomSerializer, Extraction, JValue}
+import org.json4s.{Extraction, JValue}
 
 class Block(val index: Long,
             val previousHash: HexString,
@@ -31,7 +30,7 @@ class Block(val index: Long,
   }
 
   /** String representation of the block */
-  def toJson: JValue = Extraction.decompose(this)// ++ JField("hash", JString(hash))
+  def toJson: JValue = Extraction.decompose(this) // ++ JField("hash", JString(hash))
 
   override def toString: String = compact(render(toJson))
 
