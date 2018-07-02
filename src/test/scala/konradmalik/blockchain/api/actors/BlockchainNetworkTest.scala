@@ -41,7 +41,18 @@ class BlockchainNetworkTest extends TestKit(ActorSystem("blockchainNetworkTest")
     val msg = probe.receiveOne(1 second).asInstanceOf[BlockchainNetwork.ChainNotFound]
     msg.requestId shouldBe 4
   }
-  it should "be able to get longest blockchain" in {
+  it should "return not found when getting longest chain without chains" in {
+    blockchainNetwork0.tell(BlockchainNetwork.GetLongestChain(5), probe.ref)
+
+    val msg = probe.receiveOne(1 second).asInstanceOf[BlockchainNetwork.ChainNotFound]
+    msg.requestId shouldBe 5
+
+  }
+  it should "be able to get longest blockchain when there is one" in {
+    blockchainNetwork1.tell(BlockchainNetwork.GetLongestChain(1), probe.ref)
+
+    val msg = probe.receiveOne(1 second).asInstanceOf[BlockchainNetwork.ChainNotFound]
+    msg.requestId shouldBe 4
 
   }
 }

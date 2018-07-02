@@ -1,8 +1,9 @@
 package konradmalik.blockchain.api.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props, Terminated}
-import konradmalik.blockchain.api.BLOCKCHAIN_ACTOR_NAME
 import konradmalik.blockchain.api.actors.BlockchainNetwork._
+import konradmalik.blockchain.api.{BLOCKCHAIN_ACTOR_NAME, DIFFICULTY}
+import akka.pattern.ask
 
 import scala.collection.mutable.{Map => MutableMap}
 
@@ -36,11 +37,16 @@ class BlockchainNetwork(initialBlockchains: Int) extends Actor with ActorLogging
 
   override def receive: Receive = {
     case GetAllChains(rId) => sender() ! AllChains(rId, blockchainIdToActor.toMap)
+
     case GetChainById(rId, chId) =>
       if (blockchainIdToActor.contains(chId))
         sender() ! Chain(rId, blockchainIdToActor(chId))
       else
         sender() ! ChainNotFound(rId, chId)
+
+    case GetLongestChain(rId) => if(blockchainIdToActor.isEmpty) ChainNotFound(rId, "") else {
+      sender() ! Chain(rId, )
+    }
 
     case Terminated(actor) ⇒
       log.info("Blockchain {} has been terminated", actor)
@@ -49,9 +55,13 @@ class BlockchainNetwork(initialBlockchains: Int) extends Actor with ActorLogging
   }
 
   private def initializeBlockchain(id: String): Unit = {
-    val actor = context.actorOf(Blockchain.props(id), BLOCKCHAIN_ACTOR_NAME + "-" + id)
+    val actor = context.actorOf(BlockchainActor.props(id, DIFFICULTY), BLOCKCHAIN_ACTOR_NAME + "-" + id)
     log.info("Created Blockchain, name {}", BLOCKCHAIN_ACTOR_NAME + "-" + id)
     context.watch(actor)
     blockchainIdToActor.update(id, actor)
+  }
+
+  private def getLongestChain: ActorRef = {
+    val a = blockchainIdToActor.mapValues(a => (a ? BlockchainActor.GetLength(0)).map(_.asInstanceOf[BlockchainActor.ChainLength]))
   }
 }

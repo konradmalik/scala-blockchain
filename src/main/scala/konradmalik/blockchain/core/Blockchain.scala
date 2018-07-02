@@ -27,6 +27,8 @@ class Blockchain(proof: ProofProtocol) {
 
   def getBlockchain: List[Block] = chain.result()
 
+  def length: Int = chain.length
+
   def isChainValid: Boolean = {
     val chain = getBlockchain
 
