@@ -15,7 +15,8 @@ package object api {
 
   final val PARENT_UP = "../"
 
-  final val DIFFICULTY: Int = 4
+  final val DIFFICULTY: Int = 2
 
   implicit val timeout: Timeout = Timeout(1 seconds)
+
 }

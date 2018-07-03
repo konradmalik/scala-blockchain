@@ -7,9 +7,12 @@ import org.scalatest.{FlatSpecLike, Matchers}
 class BlockchainActorTest extends TestKit(ActorSystem("blockchainActorTest")) with FlatSpecLike with Matchers {
 
   val probe = TestProbe()
-  val supervisorActor: ActorRef = system.actorOf(Supervisor.props(), "supervisor")
+  val blockchainActor: ActorRef = system.actorOf(BlockchainActor.props("0",2), "blockchainActor")
 
-  "BlockchainActor" should "" in {
+  "BlockchainActor" should "give length" in {
+    blockchainActor.tell(BlockchainActor.GetLength(0), probe.ref)
+
+    probe.expectMsg(BlockchainActor.ChainLength(0, "0", 1))
   }
 }
 

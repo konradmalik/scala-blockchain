@@ -1,16 +1,16 @@
 package konradmalik.blockchain.api.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props, Terminated}
-import konradmalik.blockchain.api.actors.BlockchainNetwork._
-import konradmalik.blockchain.api.{BLOCKCHAIN_ACTOR_NAME, DIFFICULTY}
 import akka.pattern.ask
+import konradmalik.blockchain.api.actors.BlockchainNetwork._
+import konradmalik.blockchain.api.{BLOCKCHAIN_ACTOR_NAME, DIFFICULTY, _}
 
 import scala.collection.mutable.{Map => MutableMap}
+import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 
 object BlockchainNetwork {
   def props(initialBlockchains: Int) = Props(new BlockchainNetwork(initialBlockchains))
 
-  // TODO
   final case class GetLongestChain(requestId: Int)
 
   final case class GetAllChains(requestId: Int)
@@ -26,6 +26,8 @@ object BlockchainNetwork {
 }
 
 class BlockchainNetwork(initialBlockchains: Int) extends Actor with ActorLogging {
+  // for use with Futures, Scheduler, etc.
+  implicit val executionContext: ExecutionContextExecutor = context.dispatcher
 
   val blockchainIdToActor: MutableMap[String, ActorRef] = MutableMap.empty[String, ActorRef]
   // initialize specified number of blockchains
@@ -44,9 +46,9 @@ class BlockchainNetwork(initialBlockchains: Int) extends Actor with ActorLogging
       else
         sender() ! ChainNotFound(rId, chId)
 
-    case GetLongestChain(rId) => if(blockchainIdToActor.isEmpty) ChainNotFound(rId, "") else {
-      sender() ! Chain(rId, )
-    }
+    case GetLongestChain(rId) =>
+      if (blockchainIdToActor.isEmpty) sender() ! ChainNotFound(rId, "")
+      else sender() ! getLongestChain(rId)
 
     case Terminated(actor) ⇒
       log.info("Blockchain {} has been terminated", actor)
@@ -61,7 +63,23 @@ class BlockchainNetwork(initialBlockchains: Int) extends Actor with ActorLogging
     blockchainIdToActor.update(id, actor)
   }
 
-  private def getLongestChain: ActorRef = {
-    val a = blockchainIdToActor.mapValues(a => (a ? BlockchainActor.GetLength(0)).map(_.asInstanceOf[BlockchainActor.ChainLength]))
+  private def getLongestChain(requestId: Long): Chain = {
+    def futureToFutureOption[T](f: Future[T]): Future[Option[T]] =
+      f.map(Some(_)).recover {
+        case e => None
+      }
+
+    val listOfFutureOptions = blockchainIdToActor.map {
+      case (_, ref) => (ref ? BlockchainActor.GetLength(0)).map(response => ref -> response.asInstanceOf[BlockchainActor.ChainLength])
+    }.map(futureToFutureOption)
+
+    val futureListOfOptions = Future.sequence(listOfFutureOptions)
+
+    val futureListOfSuccesses = futureListOfOptions.map(_.flatten)
+
+    Await.result(futureListOfSuccesses.map(it => {
+      println("awaited")
+      Chain(requestId, it.maxBy(_._2.chainLength)._1)
+    }), timeout.duration)
   }
 }

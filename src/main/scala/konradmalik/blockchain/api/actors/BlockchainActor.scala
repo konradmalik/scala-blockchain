@@ -18,6 +18,6 @@ class BlockchainActor(id: String, proof: ProofProtocol) extends Blockchain(proof
   override def postStop(): Unit = log.info("{}-{} stopped!", this.getClass.getSimpleName, id)
 
   override def receive: Receive = {
-    case GetLength(rId) => ChainLength(rId, id, this.length)
+    case GetLength(rId) => sender() ! ChainLength(rId, id, length)
   }
 }
