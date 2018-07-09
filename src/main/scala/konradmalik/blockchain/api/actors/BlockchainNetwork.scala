@@ -33,6 +33,8 @@ class BlockchainNetwork(initialBlockchains: Int) extends Actor with ActorLogging
   // initialize specified number of blockchains
   (0 until initialBlockchains).foreach(id => initializeBlockchain(id.toString))
 
+  var activeChain: ActorRef = _
+
   override def preStart(): Unit = log.info("{} started!", this.getClass.getSimpleName)
 
   override def postStop(): Unit = log.info("{} stopped!", this.getClass.getSimpleName)
@@ -50,6 +52,8 @@ class BlockchainNetwork(initialBlockchains: Int) extends Actor with ActorLogging
       if (blockchainIdToActor.isEmpty) sender() ! ChainNotFound(rId, "")
       else sender() ! getLongestChain(rId)
 
+    case makeBlockMsg@BlockchainActor.MakeNewBlock(_,_,_) => activeChain forward makeBlockMsg
+
     case Terminated(actor) ⇒
       log.info("Blockchain {} has been terminated", actor)
 
@@ -66,7 +70,7 @@ class BlockchainNetwork(initialBlockchains: Int) extends Actor with ActorLogging
   private def getLongestChain(requestId: Long): Chain = {
     def futureToFutureOption[T](f: Future[T]): Future[Option[T]] =
       f.map(Some(_)).recover {
-        case e => None
+        case _ => None
       }
 
     val listOfFutureOptions = blockchainIdToActor.map {
@@ -78,8 +82,9 @@ class BlockchainNetwork(initialBlockchains: Int) extends Actor with ActorLogging
     val futureListOfSuccesses = futureListOfOptions.map(_.flatten)
 
     Await.result(futureListOfSuccesses.map(it => {
-      println("awaited")
-      Chain(requestId, it.maxBy(_._2.chainLength)._1)
+      val maxChain  = it.maxBy(_._2.chainLength)._1
+      activeChain = maxChain
+      Chain(requestId, maxChain)
     }), timeout.duration)
   }
 }

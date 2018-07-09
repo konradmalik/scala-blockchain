@@ -1,8 +1,9 @@
 package konradmalik.blockchain.api.actors
 
 import akka.actor.{Actor, ActorLogging, Props}
-import konradmalik.blockchain.api.actors.BlockchainActor.{ChainLength, GetLength}
-import konradmalik.blockchain.core.Blockchain
+import konradmalik.blockchain.Transactions
+import konradmalik.blockchain.api.actors.BlockchainActor._
+import konradmalik.blockchain.core.{Block, Blockchain}
 import konradmalik.blockchain.protocols.{ProofOfWork, ProofProtocol}
 
 object BlockchainActor {
@@ -10,6 +11,9 @@ object BlockchainActor {
 
   final case class GetLength(requestId: Long)
   final case class ChainLength(requestId: Long, chainId: String, chainLength: Int)
+  final case class MakeNewBlock(requestId: Long, data: String, transactions: Transactions)
+  final case class BlockAdded(requestId: Long, block: Block)
+  final case class ErrorAddingBlock(requestId: Long)
 }
 
 class BlockchainActor(id: String, proof: ProofProtocol) extends Blockchain(proof) with Actor with ActorLogging {
@@ -19,5 +23,12 @@ class BlockchainActor(id: String, proof: ProofProtocol) extends Blockchain(proof
 
   override def receive: Receive = {
     case GetLength(rId) => sender() ! ChainLength(rId, id, length)
+
+    case MakeNewBlock(rId, data, transactions) =>
+      val block = createNextBlock(data,transactions)
+      val validBlock = validateBlock(block)
+      val isOk = addBlock(validBlock)
+      if(isOk) sender ! BlockAdded(rId, validBlock)
+      else sender ! ErrorAddingBlock(rId)
   }
 }
