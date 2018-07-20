@@ -1,6 +1,6 @@
 package konradmalik.blockchain.api.actors
 
-import akka.actor.{Actor, ActorLogging, Props, Terminated}
+import akka.actor.{Actor, ActorLogging, DeadLetter, Props, Terminated}
 import konradmalik.blockchain.api._
 import konradmalik.blockchain.api.actors.Supervisor._
 
@@ -38,6 +38,10 @@ class Supervisor extends Actor with ActorLogging {
 
     case Terminated(actor) ⇒
       log.info("Network {} has been terminated", actor)
+
+    case d: DeadLetter => {
+      log.error(s"{} saw dead letter $d",this.getClass.getSimpleName)
+    }
 
     case _ => log.info("Unknown message sent to the {} by {}", this.getClass.getSimpleName, sender())
   }
