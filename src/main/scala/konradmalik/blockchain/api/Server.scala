@@ -6,11 +6,14 @@ import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import konradmalik.blockchain.api.actors.Supervisor
+import konradmalik.blockchain.api.routes.HelloRoutes
+import konradmalik.blockchain.util.TypesafeConfig
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.io.StdIn
 
-object Server {
+object Server extends TypesafeConfig
+with HelloRoutes {
 
   def main(args: Array[String]): Unit = {
     implicit val system: ActorSystem = ActorSystem("blockchain-http-service")
@@ -26,16 +29,11 @@ object Server {
     supervisor ! Supervisor.InitializePeerNetwork(2,1)
 
     // rest api
-    val route =
-      path("hello") {
-        get {
-          complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Say hello to akka-http</h1>"))
-        }
-      }
+    val routes = helloRoutes
 
-    val bindingFuture = Http().bindAndHandle(route, "localhost", 8080)
+    val bindingFuture = Http().bindAndHandle(routes, config.getString("http.host"), config.getInt("http.port"))
 
-    println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
+    println(s"Server online at http://"+ config.getString("http.host")+":"+config.getInt("http.port")+"\nPress RETURN to stop...")
 
     // stop after ENTER
     StdIn.readLine()
