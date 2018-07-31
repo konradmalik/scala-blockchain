@@ -1,21 +1,24 @@
 package konradmalik.blockchain.api.routes
 
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Directives.{complete, get, path}
+import akka.actor.{ActorRef, ActorSystem}
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import akka.pattern.ask
+import konradmalik.blockchain.api.Message
+import konradmalik.blockchain.api.actors.Supervisor.InitializePeerNetwork
 
-sealed trait Message
+trait HelloRoutes extends RoutesSupport {
 
-final case class SuccessMsg(message: String) extends Message
+  def system: ActorSystem
 
-final case class FailureMsg(error: String) extends Message
-
-trait HelloRoutes extends JsonSupport {
+  def supervisor: ActorRef
 
   lazy val helloRoutes: Route =
     path("hello") {
       get {
-        complete(StatusCodes.OK, SuccessMsg("hello").message)
+        onSuccess((supervisor ? InitializePeerNetwork(2, 1)).mapTo[Message]) {
+          respondOnCreation
+        }
       }
     }
 }

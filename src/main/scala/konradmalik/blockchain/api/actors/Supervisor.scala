@@ -1,6 +1,7 @@
 package konradmalik.blockchain.api.actors
 
 import akka.actor.{Actor, ActorLogging, DeadLetter, Props, Terminated}
+import konradmalik.blockchain.api
 import konradmalik.blockchain.api._
 import konradmalik.blockchain.api.actors.Supervisor._
 
@@ -14,12 +15,6 @@ object Supervisor {
   final case class InitializePeerNetwork(requestId: Long, initialNo: Int) extends Initialization
 
   final case class InitializeBlockPoolNetwork(requestId: Long, initialNo: Int) extends Initialization
-
-  final case class InitializedBlockchainNetwork(requestId: Long) extends Initialization
-
-  final case class InitializedPeerNetwork(requestId: Long) extends Initialization
-
-  final case class InitializedBlockPoolNetwork(requestId: Long) extends Initialization
 
 }
 
@@ -40,7 +35,7 @@ class Supervisor extends Actor with ActorLogging {
       log.info("Network {} has been terminated", actor)
 
     case d: DeadLetter => {
-      log.error(s"{} saw dead letter $d",this.getClass.getSimpleName)
+      log.error(s"{} saw dead letter $d", this.getClass.getSimpleName)
     }
 
     case _ => log.info("Unknown message sent to the {} by {}", this.getClass.getSimpleName, sender())
@@ -49,19 +44,19 @@ class Supervisor extends Actor with ActorLogging {
   private def initializeBlockchainNetwork(requestId: Long, initialNo: Int): Unit = {
     val network = context.actorOf(BlockchainNetwork.props(initialNo), BLOCKCHAIN_NETWORK_ACTOR_NAME)
     context.watch(network)
-    sender() ! InitializedBlockchainNetwork(requestId)
+    sender() ! api.SuccessMsg(requestId, s"Initialized $initialNo Blockchain Networks")
   }
 
   private def initializePeerNetwork(requestId: Long, initialNo: Int): Unit = {
     val network = context.actorOf(PeerNetwork.props(initialNo), PEER_NETWORK_ACTOR_NAME)
     context.watch(network)
-    sender() ! InitializedPeerNetwork(requestId)
+    sender() ! api.SuccessMsg(requestId, s"Initialized $initialNo Peer Networks")
   }
 
   private def initializeBlockPool(requestId: Long, initialNo: Int): Unit = {
     val network = context.actorOf(BlockPoolNetwork.props(initialNo), BLOCK_POOL_NETWORK_ACTOR_NAME)
     context.watch(network)
-    sender() ! InitializedBlockPoolNetwork(requestId)
+    sender() ! api.SuccessMsg(requestId, s"Initialized $initialNo BlockPool Networks")
   }
 }
 
