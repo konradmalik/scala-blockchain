@@ -23,7 +23,7 @@ object Server extends App with TypesafeConfig
   // initialize required children
   supervisor ! Supervisor.InitializeBlockchainNetwork(0, 1)
   supervisor ! Supervisor.InitializeBlockPoolNetwork(1, 1)
-  supervisor ! Supervisor.InitializePeerNetwork(2, 1)
+  //supervisor ! Supervisor.InitializePeerNetwork(2, 1)
 
   // rest api
   val routes = helloRoutes
