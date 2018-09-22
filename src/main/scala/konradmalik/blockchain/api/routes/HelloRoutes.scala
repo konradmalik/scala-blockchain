@@ -16,7 +16,7 @@ trait HelloRoutes extends RoutesSupport {
   def supervisor: ActorRef
 
   lazy val helloRoutes: Route =
-    path("initializeblockpool") {
+    path("blockchain/longestchain") {
       get {
         onSuccess(supervisor ? InitializePeerNetwork(2, 1)) {
           case i: InitializedPeerNetwork => complete((StatusCodes.OK, write(i)))
