@@ -11,7 +11,7 @@ class ProofOfWork(difficulty: Int) extends ProofProtocol {
     while (!isBlockValid(provenBlock)) {
       provenBlock =
         Block(provenBlock.index, provenBlock.previousHash,
-          provenBlock.data, provenBlock.timestamp, provenBlock.nonce + 1, provenBlock.transactions)
+          provenBlock.data, provenBlock.timestamp, provenBlock.nonce + 1)
     }
 
     provenBlock
@@ -24,7 +24,7 @@ class ProofOfWork(difficulty: Int) extends ProofProtocol {
   }
 
   override def isBlockValid(block: Block): Boolean = {
-    block.hasValidMerkleHash && block.hasValidHash && isHashProved(block)
+    block.hasValidHash && isHashProved(block)
   }
 
 }

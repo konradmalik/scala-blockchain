@@ -52,7 +52,7 @@ class BlockchainNetwork(initialBlockchains: Int) extends Actor with ActorLogging
       if (blockchainIdToActor.isEmpty) sender() ! ChainNotFound(rId, "")
       else sender() ! getLongestChain(rId)
 
-    case makeBlockMsg@BlockchainActor.MakeNewBlock(_,_,_) => activeChain forward makeBlockMsg
+    case makeBlockMsg@BlockchainActor.MakeNewBlock(_,_) => activeChain forward makeBlockMsg
 
     case Terminated(actor) ⇒
       log.info("Blockchain {} has been terminated", actor)

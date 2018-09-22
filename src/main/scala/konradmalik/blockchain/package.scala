@@ -2,7 +2,7 @@ package konradmalik
 
 import java.nio.charset.Charset
 
-import konradmalik.blockchain.core.{Block, Transaction}
+import konradmalik.blockchain.core.Block
 import konradmalik.blockchain.util.BlockSerializer
 import org.json4s.native.Serialization
 import org.json4s.{Formats, NoTypeHints}
@@ -17,7 +17,6 @@ package object blockchain {
 
   type Bytes = Array[Byte]
   type HexString = String
-  type Transactions = mutable.ListBuffer[Transaction]
   type Chain = mutable.ListBuffer[Block]
 
 }

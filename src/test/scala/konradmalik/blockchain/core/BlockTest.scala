@@ -8,7 +8,6 @@ class BlockTest extends FlatSpec with Matchers {
 
   "Block" should "create valid blocks." in {
     assert(block.hasValidHash)
-    assert(block.hasValidMerkleHash)
   }
 
 }

@@ -2,7 +2,6 @@ package konradmalik.blockchain.api.actors
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{TestKit, TestProbe}
-import konradmalik.blockchain.Transactions
 import org.scalatest.{FlatSpecLike, Matchers}
 
 import scala.concurrent.duration._
@@ -57,7 +56,7 @@ class BlockchainNetworkTest extends TestKit(ActorSystem("blockchainNetworkTest")
     msg.requestId shouldBe 6
   }
   it should "properly formard new block mining" in {
-    blockchainNetwork1.tell(BlockchainActor.MakeNewBlock(7, "data", new Transactions), probe.ref)
+    blockchainNetwork1.tell(BlockchainActor.MakeNewBlock(7, "data"), probe.ref)
 
     val msg1 = probe.receiveOne(10 second).asInstanceOf[BlockchainActor.BlockAdded]
     msg1.requestId shouldBe 7

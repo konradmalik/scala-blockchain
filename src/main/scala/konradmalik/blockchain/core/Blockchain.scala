@@ -1,7 +1,7 @@
 package konradmalik.blockchain.core
 
 import konradmalik.blockchain.protocols.ProofProtocol
-import konradmalik.blockchain.{Chain, Transactions}
+import konradmalik.blockchain.Chain
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
@@ -56,9 +56,9 @@ class Blockchain(proof: ProofProtocol) {
     addBlock(validateBlock(block))
   }
 
-  def createNextBlock(data: String, transactions: Transactions): Block = {
+  def createNextBlock(data: String): Block = {
     val lb = getLastBlock
-    Block(lb.index + 1, lb.hash, data, 0, transactions)
+    Block(lb.index + 1, lb.hash, data, 0)
   }
 
 }

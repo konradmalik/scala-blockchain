@@ -2,7 +2,6 @@ package konradmalik.blockchain.api.actors
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{TestKit, TestProbe}
-import konradmalik.blockchain.Transactions
 import org.scalatest.{FlatSpecLike, Matchers}
 import konradmalik.blockchain.api._
 
@@ -17,7 +16,7 @@ class BlockchainActorTest extends TestKit(ActorSystem("blockchainActorTest")) wi
     probe.expectMsg(BlockchainActor.ChainLength(0, "0", 1))
   }
   it should "mine new block with no problems" in {
-    blockchainActor.tell(BlockchainActor.MakeNewBlock(1, "data", new Transactions), probe.ref)
+    blockchainActor.tell(BlockchainActor.MakeNewBlock(1, "data"), probe.ref)
     val addedBlock = probe.receiveOne(timeout.duration).asInstanceOf[BlockchainActor.BlockAdded]
     assert(addedBlock.requestId == 1)
 
