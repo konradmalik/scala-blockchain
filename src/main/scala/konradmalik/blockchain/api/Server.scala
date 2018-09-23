@@ -3,17 +3,17 @@ package konradmalik.blockchain.api
 import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
+import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import konradmalik.blockchain.api.actors.Supervisor
-import konradmalik.blockchain.api.routes.HelloRoutes
+import konradmalik.blockchain.api.routes.BlockchainRoutes
 import konradmalik.blockchain.util.TypesafeConfig
-import akka.pattern.ask
 
-import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent.{Await, ExecutionContextExecutor}
 import scala.io.StdIn
 
 object Server extends App with TypesafeConfig
-  with HelloRoutes {
+  with BlockchainRoutes {
 
   implicit val system: ActorSystem = ActorSystem("blockchain-http-service")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -23,12 +23,15 @@ object Server extends App with TypesafeConfig
   // top level supervisor
   val supervisor: ActorRef = system.actorOf(Supervisor.props(), "supervisor")
   // initialize required children
-  supervisor ? Supervisor.InitializeBlockchainNetwork(System.currentTimeMillis(), 1)
+  val blockchain = Await.result(
+    (supervisor ? Supervisor.InitializeBlockchain(System.currentTimeMillis()))
+      .map(_ => system.actorSelection("user/supervisor/" + BLOCKCHAIN_ACTOR_NAME)), selectionTimeout
+  )
   //supervisor ? Supervisor.InitializeBlockPoolNetwork(1, 1) // not yet useful/implemented
   //supervisor ? Supervisor.InitializePeerNetwork(2, 1) // not yet useful/implemented
 
   // rest api
-  val routes: Route = helloRoutes
+  val routes: Route = blockchainRoutes
 
   val bindingFuture = Http().bindAndHandle(routes, config.getString("http.host"), config.getInt("http.port"))
 

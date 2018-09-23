@@ -3,16 +3,14 @@ package konradmalik
 import java.nio.charset.Charset
 
 import konradmalik.blockchain.core.Block
-import konradmalik.blockchain.util.BlockSerializer
-import org.json4s.native.Serialization
-import org.json4s.{Formats, NoTypeHints}
 
 import scala.collection.mutable
 
 package object blockchain {
 
+  final val DIFFICULTY: Int = 2
+
   //implicit val formats = DefaultFormats
-  implicit val formats: AnyRef with Formats = Serialization.formats(NoTypeHints) + new BlockSerializer
   implicit val defaultCharset: Charset = Charset.forName("UTF-8")
 
   type Bytes = Array[Byte]

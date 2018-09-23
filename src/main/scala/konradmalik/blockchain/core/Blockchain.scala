@@ -2,9 +2,11 @@ package konradmalik.blockchain.core
 
 import konradmalik.blockchain.protocols.ProofProtocol
 import konradmalik.blockchain.Chain
+import konradmalik.blockchain.api.routes.JsonSupport
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
+import spray.json._
 
 
 class Blockchain(proof: ProofProtocol) {
@@ -61,9 +63,10 @@ class Blockchain(proof: ProofProtocol) {
     Block(lb.index + 1, lb.hash, data, 0)
   }
 
+  override def toString: String = this.toJson.compactPrint
 }
 
-object Blockchain {
+object Blockchain extends JsonSupport {
   def isValidLinkBetween(earlier: Block, next: Block): Boolean = {
     earlier.hash.equals(next.previousHash) && earlier.index + 1 == next.index
   }

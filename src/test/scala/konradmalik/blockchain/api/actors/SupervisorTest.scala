@@ -2,7 +2,7 @@ package konradmalik.blockchain.api.actors
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{TestKit, TestProbe}
-import konradmalik.blockchain.api.actors.Supervisor.{InitializedBlockPoolNetwork, InitializedBlockchainNetwork, InitializedPeerNetwork}
+import konradmalik.blockchain.api.actors.Supervisor.{InitializedBlockPool, InitializedBlockchain, InitializedPeer}
 import org.scalatest.{FlatSpecLike, Matchers}
 
 class SupervisorTest extends TestKit(ActorSystem("supervisorTest")) with FlatSpecLike with Matchers {
@@ -10,20 +10,20 @@ class SupervisorTest extends TestKit(ActorSystem("supervisorTest")) with FlatSpe
   val probe = TestProbe()
   val supervisorActor: ActorRef = system.actorOf(Supervisor.props(), "supervisor")
 
-  "Supervisor" should "be able to start Blockchain Network" in {
+  "Supervisor" should "be able to start Blockchain" in {
 
-    supervisorActor.tell(Supervisor.InitializeBlockchainNetwork(requestId = 0, 0), probe.ref)
-    probe.expectMsg(InitializedBlockchainNetwork(0, 0))
+    supervisorActor.tell(Supervisor.InitializeBlockchain(requestId = 0), probe.ref)
+    probe.expectMsg(InitializedBlockchain(0))
   }
-  it should "be able to start Peer Network" in {
+  it should "be able to start Peer" in {
 
-    supervisorActor.tell(Supervisor.InitializePeerNetwork(requestId = 1, 0), probe.ref)
-    probe.expectMsg(InitializedPeerNetwork(1, 0))
+    supervisorActor.tell(Supervisor.InitializePeer(requestId = 1), probe.ref)
+    probe.expectMsg(InitializedPeer(1))
   }
-  it should "be able to start BlockPool Network" in {
+  it should "be able to start BlockPool" in {
 
-    supervisorActor.tell(Supervisor.InitializeBlockPoolNetwork(requestId = 2, 0), probe.ref)
-    probe.expectMsg(InitializedBlockPoolNetwork(2, 0))
+    supervisorActor.tell(Supervisor.InitializeBlockPool(requestId = 2), probe.ref)
+    probe.expectMsg(InitializedBlockPool(2))
   }
   it should "ignore unknown messages" in {
 

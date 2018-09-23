@@ -1,28 +1,27 @@
 package konradmalik.blockchain.api.actors
 
 import akka.actor.{Actor, ActorLogging, DeadLetter, Props, Terminated}
+import konradmalik.blockchain._
 import konradmalik.blockchain.api._
 import konradmalik.blockchain.api.actors.Supervisor._
 import konradmalik.blockchain.api.routes.Success
-
-import scala.util.Try
 
 object Supervisor {
   def props() = Props(new Supervisor)
 
   sealed trait Initialization
 
-  final case class InitializeBlockchainNetwork(requestId: Long, initialNo: Int) extends Initialization
+  final case class InitializeBlockchain(requestId: Long) extends Initialization
 
-  final case class InitializedBlockchainNetwork(requestId: Long, initialNo: Int) extends Success
+  final case class InitializedBlockchain(requestId: Long) extends Success
 
-  final case class InitializePeerNetwork(requestId: Long, initialNo: Int) extends Initialization
+  final case class InitializePeer(requestId: Long) extends Initialization
 
-  final case class InitializedPeerNetwork(requestId: Long, initialNo: Int) extends Success
+  final case class InitializedPeer(requestId: Long) extends Success
 
-  final case class InitializeBlockPoolNetwork(requestId: Long, initialNo: Int) extends Initialization
+  final case class InitializeBlockPool(requestId: Long) extends Initialization
 
-  final case class InitializedBlockPoolNetwork(requestId: Long, initialNo: Int) extends Success
+  final case class InitializedBlockPool(requestId: Long) extends Success
 
 }
 
@@ -33,13 +32,13 @@ class Supervisor extends Actor with ActorLogging {
   override def postStop(): Unit = log.info("{} stopped!", this.getClass.getSimpleName)
 
   override def receive: Receive = {
-    case InitializeBlockchainNetwork(rId, iNo) => initializeBlockchainNetwork(rId, iNo)
+    case InitializeBlockchain(rId) => initializeBlockchain(rId)
 
-    case InitializePeerNetwork(rId, iNo) => initializePeerNetwork(rId, iNo)
+    case InitializePeer(rId) => initializePeer(rId)
 
-    case InitializeBlockPoolNetwork(rId, iNo) => initializeBlockPool(rId, iNo)
+    case InitializeBlockPool(rId) => initializeBlockPool(rId)
 
-    case Terminated(actor) ⇒
+    case Terminated(actor) =>
       log.info("Network {} has been terminated", actor)
 
     case d: DeadLetter =>
@@ -48,22 +47,25 @@ class Supervisor extends Actor with ActorLogging {
     case _ => log.info("Unknown message sent to the {} by {}", this.getClass.getSimpleName, sender())
   }
 
-  private def initializeBlockchainNetwork(requestId: Long, initialNo: Int): Unit = {
-    val network = context.actorOf(BlockchainNetwork.props(initialNo), BLOCKCHAIN_NETWORK_ACTOR_NAME)
-    context.watch(network)
-    sender() ! InitializedBlockchainNetwork(requestId, initialNo)
+  private def initializeBlockchain(requestId: Long): Unit = {
+    val actor = context.actorOf(BlockchainActor.props(DIFFICULTY), BLOCKCHAIN_ACTOR_NAME)
+    log.info("Created Blockchain, name {}", BLOCKCHAIN_ACTOR_NAME)
+    context.watch(actor)
+    sender() ! InitializedBlockchain(requestId)
   }
 
-  private def initializePeerNetwork(requestId: Long, initialNo: Int): Unit = {
-    val network = context.actorOf(PeerNetwork.props(initialNo), PEER_NETWORK_ACTOR_NAME)
-    context.watch(network)
-    sender() ! InitializedPeerNetwork(requestId, initialNo)
+  private def initializePeer(requestId: Long): Unit = {
+    val actor = context.actorOf(PeerActor.props, PEER_ACTOR_NAME)
+    log.info("Created Peer, name {}", PEER_ACTOR_NAME)
+    context.watch(actor)
+    sender() ! InitializedPeer(requestId)
   }
 
-  private def initializeBlockPool(requestId: Long, initialNo: Int): Unit = {
-    val network = context.actorOf(BlockPoolNetwork.props(initialNo), BLOCK_POOL_NETWORK_ACTOR_NAME)
-    context.watch(network)
-    sender() ! InitializedBlockPoolNetwork(requestId, initialNo)
+  private def initializeBlockPool(requestId: Long): Unit = {
+    val actor = context.actorOf(BlockPoolActor.props, BLOCK_POOL_ACTOR_NAME)
+    log.info("Created Peer, name {}", BLOCK_POOL_ACTOR_NAME)
+    context.watch(actor)
+    sender() ! InitializedBlockPool(requestId)
   }
 }
 
