@@ -37,7 +37,7 @@ class Blockchain(proof: ProofProtocol) {
     @tailrec
     def checkChain(chain: List[Block]): Boolean = {
       chain match {
-        case Nil => false
+        case Nil => true
         case g +: Nil => g.previousHash.equals("0" * 64) && g.index == 0 && isBlockValid(g)
         case a +: b +: tail => isBlockValid(a) && isBlockValid(b) && Blockchain.isValidLinkBetween(a, b) && checkChain(tail)
       }

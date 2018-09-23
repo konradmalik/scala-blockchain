@@ -28,5 +28,10 @@ class BlockchainActorTest extends TestKit(ActorSystem("blockchainActorTest")) wi
     val chain = probe.receiveOne(askTimeout.duration).asInstanceOf[BlockchainActor.Chain]
     assert(chain.chain.getBlockchain.size == 2)
   }
+  it should "return if its valid" in {
+    blockchainActor.tell(BlockchainActor.IsChainValid(4), probe.ref)
+    val valid = probe.receiveOne(askTimeout.duration).asInstanceOf[BlockchainActor.ChainValidity]
+    assert(valid.valid)
+  }
 }
 

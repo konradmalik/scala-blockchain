@@ -9,6 +9,7 @@ import konradmalik.blockchain.api.actors.Supervisor
 import konradmalik.blockchain.api.routes.BlockchainRoutes
 import konradmalik.blockchain.util.TypesafeConfig
 
+import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{Await, ExecutionContextExecutor}
 import scala.io.StdIn
 
@@ -25,7 +26,8 @@ object Server extends App with TypesafeConfig
   // initialize required children
   val blockchain = Await.result(
     (supervisor ? Supervisor.InitializeBlockchain(System.currentTimeMillis()))
-      .map(_ => system.actorSelection("user/supervisor/" + BLOCKCHAIN_ACTOR_NAME)), selectionTimeout
+      .flatMap(_ => system.actorSelection("user/supervisor/" + BLOCKCHAIN_ACTOR_NAME)
+        .resolveOne(FiniteDuration(selectionTimeout._1, selectionTimeout._2))), selectionTimeout
   )
   //supervisor ? Supervisor.InitializeBlockPoolNetwork(1, 1) // not yet useful/implemented
   //supervisor ? Supervisor.InitializePeerNetwork(2, 1) // not yet useful/implemented

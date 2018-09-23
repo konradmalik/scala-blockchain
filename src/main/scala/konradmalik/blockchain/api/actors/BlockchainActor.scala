@@ -10,11 +10,13 @@ object BlockchainActor {
 
   final case class GetLength(requestId: Long)
   final case class GetChain(requestId: Long)
+  final case class IsChainValid(requestId: Long)
   final case class ChainLength(requestId: Long, chainLength: Int)
   final case class MakeNewBlock(requestId: Long, data: String)
   final case class BlockAdded(requestId: Long, block: Block)
   final case class ErrorAddingBlock(requestId: Long)
   final case class Chain(requestId: Long, chain: Blockchain)
+  final case class ChainValidity(timestamp: Long, valid: Boolean)
 }
 
 class BlockchainActor(proof: ProofProtocol) extends Blockchain(proof) with Actor with ActorLogging {
@@ -25,12 +27,19 @@ class BlockchainActor(proof: ProofProtocol) extends Blockchain(proof) with Actor
   override def receive: Receive = {
     case GetLength(rId) => sender() ! ChainLength(rId, length)
     case GetChain(rId) => sender() ! Chain(rId, this)
+    case IsChainValid(rId) => sender() ! ChainValidity(rId, isChainValid)
 
     case MakeNewBlock(rId, data) =>
       val block = createNextBlock(data)
       val validBlock = validateBlock(block)
       val isOk = addBlock(validBlock)
-      if(isOk) sender ! BlockAdded(rId, validBlock)
-      else sender ! ErrorAddingBlock(rId)
+      if(isOk) {
+        log.info("Added block at: " + rId + " with data: " + data)
+        sender ! BlockAdded(rId, validBlock)
+      }
+      else {
+        log.error("Could not add block at: " + rId + " with data: " + data)
+        sender ! ErrorAddingBlock(rId)
+      }
   }
 }
