@@ -11,17 +11,17 @@ object Supervisor {
 
   sealed trait Initialization
 
-  final case class InitializeBlockchain(requestId: Long) extends Initialization
+  final case class InitializeBlockchain(timestamp: Long) extends Initialization
 
-  final case class InitializedBlockchain(requestId: Long) extends Success
+  final case class InitializedBlockchain(timestamp: Long) extends Success
 
-  final case class InitializePeer(requestId: Long) extends Initialization
+  final case class InitializePeer(timestamp: Long) extends Initialization
 
-  final case class InitializedPeer(requestId: Long) extends Success
+  final case class InitializedPeer(timestamp: Long) extends Success
 
-  final case class InitializeBlockPool(requestId: Long) extends Initialization
+  final case class InitializeBlockPool(timestamp: Long) extends Initialization
 
-  final case class InitializedBlockPool(requestId: Long) extends Success
+  final case class InitializedBlockPool(timestamp: Long) extends Success
 
 }
 

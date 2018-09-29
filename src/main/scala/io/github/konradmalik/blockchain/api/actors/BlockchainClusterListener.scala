@@ -8,7 +8,7 @@ import io.github.konradmalik.blockchain.api.actors.BlockchainClusterListener.Get
 object BlockchainClusterListener {
   def props = Props(new BlockchainClusterListener)
 
-  final case object GetNodes
+  final case class GetNodes(timestamp: Long)
 }
 
 class BlockchainClusterListener extends Actor with ActorLogging {
@@ -39,7 +39,7 @@ class BlockchainClusterListener extends Actor with ActorLogging {
       nodes -= member.address
       log.info("Member is Removed: {} after {}",
         member.address, previousStatus)
-    case GetNodes => sender ! nodes
+    case GetNodes(_) => sender ! nodes
     case _: MemberEvent => log.info("Unknown member event ignored")
   }
 }

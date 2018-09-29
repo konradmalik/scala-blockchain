@@ -8,14 +8,14 @@ import io.github.konradmalik.blockchain.protocols.{ProofOfWork, ProofProtocol}
 object BlockchainActor {
   def props(difficulty: Int) = Props(new BlockchainActor(new ProofOfWork(difficulty)))
 
-  final case class GetLength(requestId: Long)
-  final case class GetChain(requestId: Long)
-  final case class IsChainValid(requestId: Long)
-  final case class ChainLength(requestId: Long, chainLength: Int)
-  final case class MakeNewBlock(requestId: Long, data: String)
-  final case class BlockAdded(requestId: Long, block: Block)
-  final case class ErrorAddingBlock(requestId: Long)
-  final case class Chain(requestId: Long, chain: Blockchain)
+  final case class GetLength(timestamp: Long)
+  final case class GetChain(timestamp: Long)
+  final case class IsChainValid(timestamp: Long)
+  final case class ChainLength(timestamp: Long, chainLength: Int)
+  final case class MakeNewBlock(timestamp: Long, data: String)
+  final case class BlockAdded(timestamp: Long, block: Block)
+  final case class ErrorAddingBlock(timestamp: Long)
+  final case class Chain(timestamp: Long, chain: Blockchain)
   final case class ChainValidity(timestamp: Long, valid: Boolean)
 }
 

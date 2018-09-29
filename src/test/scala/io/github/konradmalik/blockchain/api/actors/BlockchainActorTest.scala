@@ -18,7 +18,7 @@ class BlockchainActorTest extends TestKit(ActorSystem("blockchainActorTest")) wi
   it should "mine new block with no problems" in {
     blockchainActor.tell(BlockchainActor.MakeNewBlock(1, "data"), probe.ref)
     val addedBlock = probe.receiveOne(askTimeout.duration).asInstanceOf[BlockchainActor.BlockAdded]
-    assert(addedBlock.requestId == 1)
+    assert(addedBlock.timestamp == 1)
 
     blockchainActor.tell(BlockchainActor.GetLength(2), probe.ref)
     probe.expectMsg(BlockchainActor.ChainLength(2, 2))
