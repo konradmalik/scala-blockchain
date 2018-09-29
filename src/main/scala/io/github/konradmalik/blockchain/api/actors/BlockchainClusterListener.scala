@@ -1,8 +1,15 @@
 package io.github.konradmalik.blockchain.api.actors
 
-import akka.actor.{Actor, ActorLogging}
-import akka.cluster.Cluster
+import akka.actor.{Actor, ActorLogging, Address, Props}
+import akka.cluster.{Cluster, MemberStatus}
 import akka.cluster.ClusterEvent._
+import io.github.konradmalik.blockchain.api.actors.BlockchainClusterListener.GetNodes
+
+object BlockchainClusterListener {
+  def props = Props(new BlockchainClusterListener)
+
+  final case object GetNodes
+}
 
 class BlockchainClusterListener extends Actor with ActorLogging {
 
@@ -16,14 +23,23 @@ class BlockchainClusterListener extends Actor with ActorLogging {
 
   override def postStop(): Unit = cluster.unsubscribe(self)
 
+  var nodes = Set.empty[Address]
+
   def receive: PartialFunction[Any, Unit] = {
+    case state: CurrentClusterState =>
+      nodes = state.members.collect {
+        case m if m.status == MemberStatus.Up => m.address
+      }
     case MemberUp(member) =>
+      nodes += member.address
       log.info("Member is Up: {}", member.address)
     case UnreachableMember(member) =>
       log.info("Member detected as unreachable: {}", member)
     case MemberRemoved(member, previousStatus) =>
+      nodes -= member.address
       log.info("Member is Removed: {} after {}",
         member.address, previousStatus)
-    case _: MemberEvent => // ignore
+    case GetNodes => sender ! nodes
+    case _: MemberEvent => log.info("Unknown member event ignored")
   }
 }
