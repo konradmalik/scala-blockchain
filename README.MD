@@ -6,9 +6,7 @@ Project created to learn akka, akka-http, blockchain etc.
 To start first node one should provide 2 args: host and port. Example:
 ```java -jar scala-blockchain-0.1-jar-with-dependencies.jar 127.0.0.1 9001```
 To start more nodes, one should provide host, port and URI string to one of the already running nodes. Example:
-```java -jar scala-blockchain-0.1-jar-with-dependencies.jar 127.0.0.1 9002 akka://blockchainSystem@127.0.0.1:19001```
-
-Notice that for now 
+```java -jar scala-blockchain-0.1-jar-with-dependencies.jar 127.0.0.1 9002 akka://blockchainSystem@127.0.0.1:9001```
 
 # API (json based)
 ## Blockchain
