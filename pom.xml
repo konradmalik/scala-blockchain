@@ -49,6 +49,30 @@
             <artifactId>akka-actor_${scala.compat.version}</artifactId>
             <version>${akka.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-remote -->
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-remote_${scala.compat.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-cluster -->
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-cluster-metrics_${scala.compat.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-cluster -->
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-cluster-tools_${scala.compat.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-cluster -->
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-cluster_${scala.compat.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.typesafe.akka/akka-stream -->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
@@ -92,8 +116,6 @@
             <version>${akka-http.version}</version>
             <scope>test</scope>
         </dependency>
-
-
     </dependencies>
 
     <build>
