@@ -2,6 +2,14 @@
 This repo is of course still work in progress and definetly is not complete/ready.
 Project created to learn akka, akka-http, blockchain etc.
 
+# Running
+To start first node one should provide 2 args: host and port. Example:
+```java -jar scala-blockchain-0.1-jar-with-dependencies.jar 127.0.0.1 9001```
+To start more nodes, one should provide host, port and URI string to one of the already running nodes. Example:
+```java -jar scala-blockchain-0.1-jar-with-dependencies.jar 127.0.0.1 9002 akka://blockchainSystem@127.0.0.1:19001```
+
+Notice that for now 
+
 # API (json based)
 ## Blockchain
 ### GET:
@@ -10,7 +18,7 @@ Project created to learn akka, akka-http, blockchain etc.
 * blockchain/valid - checks if blockchain is valid
 ```{"timestamp":1537727402999,"valid":true}```
 
-### PUT:
+### POST:
 * blockchain/add_and_mine; data:String - creates new block with data = "data", mines it and returns timestamp and its json representation
 ```{"timestamp":1537728832880,"block":{"previousHash":"00564f199d2000d6c7d99a84282fa79de02b21720268bc8e1d37b9e2e8374113","timestamp":1537728832881,"nonce":210,"data":"{\"key1\":\"value1\", \"key2\":\"value2\"}","index":1}}```
 

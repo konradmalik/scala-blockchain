@@ -1,6 +1,6 @@
 package io.github.konradmalik.blockchain.api
 
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
@@ -15,9 +15,11 @@ import scala.io.StdIn
 
 object Server extends App with TypesafeConfig with BlockchainRoutes {
 
-  implicit val system: ActorSystem = ActorSystem("blockchain-http-service", config)
+  val runningClusterAddress: String = if(args.length == 3) args(2) else ""
+
+  implicit val system: ActorSystem = ActorSystem("blockchainSystem", config)
   // Create an actor that handles cluster domain events
-  val blockchainClusterListener = system.actorOf(Props[BlockchainClusterListener], name = "blockchain-cluster-listener")
+  val blockchainClusterListener = system.actorOf(BlockchainClusterListener.props(runningClusterAddress), name = "blockchainClusterListener")
 
   implicit val materializer: ActorMaterializer = ActorMaterializer()
 

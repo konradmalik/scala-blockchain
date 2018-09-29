@@ -1,19 +1,27 @@
 package io.github.konradmalik.blockchain.api.actors
 
-import akka.actor.{Actor, ActorLogging, Address, Props}
-import akka.cluster.{Cluster, MemberStatus}
+import akka.actor.{Actor, ActorLogging, Address, AddressFromURIString, Props}
 import akka.cluster.ClusterEvent._
+import akka.cluster.{Cluster, MemberStatus}
 import io.github.konradmalik.blockchain.api.actors.BlockchainClusterListener.GetNodes
 
 object BlockchainClusterListener {
-  def props = Props(new BlockchainClusterListener)
+  def props(nodeAddress: String) = Props(new BlockchainClusterListener(nodeAddress))
 
   final case class GetNodes(timestamp: Long)
+
 }
 
-class BlockchainClusterListener extends Actor with ActorLogging {
+class BlockchainClusterListener(nodeAddress: String) extends Actor with ActorLogging {
 
   val cluster: Cluster = Cluster(context.system)
+  // if existing node provided, then join it, else join itself (important!)
+  if (nodeAddress.nonEmpty)
+    cluster.join(AddressFromURIString(nodeAddress))
+  else
+    cluster.join(cluster.selfAddress)
+
+  var nodes = Set.empty[Address]
 
   // subscribe to cluster changes, re-subscribe when restart
   override def preStart(): Unit = {
@@ -22,8 +30,6 @@ class BlockchainClusterListener extends Actor with ActorLogging {
   }
 
   override def postStop(): Unit = cluster.unsubscribe(self)
-
-  var nodes = Set.empty[Address]
 
   def receive: PartialFunction[Any, Unit] = {
     case state: CurrentClusterState =>
