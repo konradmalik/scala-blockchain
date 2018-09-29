@@ -38,7 +38,7 @@ trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
     * Chain
     */
   implicit val chainJsonWriter: JsonWriter[Chain] = (c: Chain) =>
-    JsObject("timestamp" -> JsNumber(c.requestId), "blockchain" -> c.chain.toJson)
+    JsObject("timestamp" -> JsNumber(c.timestamp), "blockchain" -> c.chain.toJson)
 
   /**
     * Chain validity
@@ -49,5 +49,5 @@ trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
     * BlockAdded
     */
   implicit val blockAddedJsonWriter: JsonWriter[BlockAdded] = (ba: BlockAdded) =>
-    JsObject("timestamp" -> JsNumber(ba.requestId), "block" -> ba.block.toJson)
+    JsObject("timestamp" -> JsNumber(ba.timestamp), "block" -> ba.block.toJson)
 }
