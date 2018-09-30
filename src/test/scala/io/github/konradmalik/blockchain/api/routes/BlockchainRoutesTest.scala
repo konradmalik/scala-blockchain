@@ -27,7 +27,15 @@ class BlockchainRoutesTest extends FlatSpecLike with Matchers with ScalatestRout
     }
   }
   it should "add and mine new block" in {
-    Post("/blockchain/add_and_mine", "dummy_data") ~> blockchainRoutes ~> check {
+    Post("/blockchain/mine", "dummy_data") ~> blockchainRoutes ~> check {
+      val res: JsObject = responseAs[JsObject]
+      assert(res.fields.keySet.contains("timestamp") && res.fields.keySet.contains("block"))
+      val block = res.getFields("block").head.asInstanceOf[JsObject]
+      assert(block.getFields("data").head.asInstanceOf[JsString].value == "dummy_data")
+    }
+  }
+  it should "get last block" in {
+    Get("/blockchain/last") ~> blockchainRoutes ~> check {
       val res: JsObject = responseAs[JsObject]
       assert(res.fields.keySet.contains("timestamp") && res.fields.keySet.contains("block"))
       val block = res.getFields("block").head.asInstanceOf[JsObject]

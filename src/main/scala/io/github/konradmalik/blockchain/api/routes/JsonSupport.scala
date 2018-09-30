@@ -1,7 +1,7 @@
 package io.github.konradmalik.blockchain.api.routes
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import io.github.konradmalik.blockchain.api.actors.BlockchainActor.{BlockAdded, Chain, ChainValidity}
+import io.github.konradmalik.blockchain.api.actors.BlockchainActor.{BlockMsg, Chain, ChainValidity}
 import io.github.konradmalik.blockchain.core.{Block, Blockchain}
 import spray.json.DefaultJsonProtocol
 
@@ -48,6 +48,6 @@ trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   /**
     * BlockAdded
     */
-  implicit val blockAddedJsonWriter: JsonWriter[BlockAdded] = (ba: BlockAdded) =>
+  implicit val blockAddedJsonWriter: JsonWriter[BlockMsg] = (ba: BlockMsg) =>
     JsObject("timestamp" -> JsNumber(ba.timestamp), "block" -> ba.block.toJson)
 }

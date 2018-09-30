@@ -7,6 +7,7 @@ import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import io.github.konradmalik.blockchain.api._
 import io.github.konradmalik.blockchain.api.actors.BlockchainActor
+import io.github.konradmalik.blockchain.api.actors.BlockchainActor.BlockMsg
 import spray.json._
 
 import scala.concurrent.Future
@@ -36,13 +37,21 @@ trait BlockchainRoutes extends JsonSupport {
             }
           }
         },
-        path("add_and_mine") {
+        path("last") {
+          get {
+            val blockFuture = blockchain ? BlockchainActor.GetLastBlock(System.currentTimeMillis())
+            onSuccess(blockFuture.mapTo[BlockchainActor.BlockMsg]) { msg =>
+              complete(msg.toJson)
+            }
+          }
+        },
+        path("mine") {
           post {
             entity(as[String]) { entity =>
               val newBlock: Future[Any] = blockchain ? BlockchainActor.MakeNewBlock(System.currentTimeMillis(), entity)
               onSuccess(newBlock) {
-                case BlockchainActor.ErrorAddingBlock(_) => complete(StatusCodes.InternalServerError)
-                case added: BlockchainActor.BlockAdded => complete(StatusCodes.Created, added.toJson)
+                case ErrorMsg(_) => complete(StatusCodes.InternalServerError)
+                case added: BlockMsg => complete(StatusCodes.Created, added.toJson)
               }
             }
           }
