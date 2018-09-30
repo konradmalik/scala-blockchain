@@ -1,6 +1,6 @@
 package io.github.konradmalik.blockchain.api.actors
 
-import akka.actor.{Actor, ActorLogging, DeadLetter, Props, Terminated}
+import akka.actor.{Actor, ActorLogging, ActorRef, DeadLetter, Props, Terminated}
 import io.github.konradmalik.blockchain._
 import io.github.konradmalik.blockchain.api._
 import io.github.konradmalik.blockchain.api.actors.Supervisor._
@@ -13,15 +13,15 @@ object Supervisor {
 
   final case class InitializeBlockchain(timestamp: Long) extends Initialization
 
-  final case class InitializedBlockchain(timestamp: Long) extends Success
+  final case class InitializedBlockchain(timestamp: Long, actor: ActorRef) extends Success
 
   final case class InitializePeer(timestamp: Long) extends Initialization
 
-  final case class InitializedPeer(timestamp: Long) extends Success
+  final case class InitializedPeer(timestamp: Long, actor: ActorRef) extends Success
 
   final case class InitializeBlockPool(timestamp: Long) extends Initialization
 
-  final case class InitializedBlockPool(timestamp: Long) extends Success
+  final case class InitializedBlockPool(timestamp: Long, actor: ActorRef) extends Success
 
 }
 
@@ -51,21 +51,21 @@ class Supervisor extends Actor with ActorLogging {
     val actor = context.actorOf(BlockchainActor.props(DIFFICULTY), BLOCKCHAIN_ACTOR_NAME)
     log.info("Created Blockchain, name {}", BLOCKCHAIN_ACTOR_NAME)
     context.watch(actor)
-    sender() ! InitializedBlockchain(requestId)
+    sender() ! InitializedBlockchain(requestId, actor)
   }
 
   private def initializePeer(requestId: Long): Unit = {
     val actor = context.actorOf(PeerActor.props, PEER_ACTOR_NAME)
     log.info("Created Peer, name {}", PEER_ACTOR_NAME)
     context.watch(actor)
-    sender() ! InitializedPeer(requestId)
+    sender() ! InitializedPeer(requestId, actor)
   }
 
   private def initializeBlockPool(requestId: Long): Unit = {
     val actor = context.actorOf(BlockPoolActor.props, BLOCK_POOL_ACTOR_NAME)
     log.info("Created Peer, name {}", BLOCK_POOL_ACTOR_NAME)
     context.watch(actor)
-    sender() ! InitializedBlockPool(requestId)
+    sender() ! InitializedBlockPool(requestId, actor)
   }
 }
 

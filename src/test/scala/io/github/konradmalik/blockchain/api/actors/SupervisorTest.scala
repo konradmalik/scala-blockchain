@@ -13,17 +13,17 @@ class SupervisorTest extends TestKit(ActorSystem("supervisorTest")) with FlatSpe
   "Supervisor" should "be able to start Blockchain" in {
 
     supervisorActor.tell(Supervisor.InitializeBlockchain(timestamp = 0), probe.ref)
-    probe.expectMsg(InitializedBlockchain(0))
+    probe.expectMsgClass(classOf[InitializedBlockchain])
   }
   it should "be able to start Peer" in {
 
     supervisorActor.tell(Supervisor.InitializePeer(timestamp = 1), probe.ref)
-    probe.expectMsg(InitializedPeer(1))
+    probe.expectMsgClass(classOf[InitializedPeer])
   }
   it should "be able to start BlockPool" in {
 
     supervisorActor.tell(Supervisor.InitializeBlockPool(timestamp = 2), probe.ref)
-    probe.expectMsg(InitializedBlockPool(2))
+    probe.expectMsgClass(classOf[InitializedBlockPool])
   }
   it should "ignore unknown messages" in {
 

@@ -5,11 +5,11 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
+import io.github.konradmalik.blockchain.api.actors.Supervisor.InitializedBlockchain
 import io.github.konradmalik.blockchain.api.actors.{BlockchainClusterListener, Supervisor}
 import io.github.konradmalik.blockchain.api.routes.BlockchainRoutes
 import io.github.konradmalik.blockchain.util.TypesafeConfig
 
-import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{Await, ExecutionContextExecutor}
 import scala.io.StdIn
 
@@ -30,8 +30,7 @@ object Server extends App with TypesafeConfig with BlockchainRoutes {
   // initialize required children
   val blockchain = Await.result(
     (supervisor ? Supervisor.InitializeBlockchain(System.currentTimeMillis()))
-      .flatMap(_ => system.actorSelection("user/supervisor/" + BLOCKCHAIN_ACTOR_NAME)
-        .resolveOne(FiniteDuration(selectionTimeout._1, selectionTimeout._2))), selectionTimeout
+      .mapTo[InitializedBlockchain].map(_.actor), selectionTimeout
   )
   //supervisor ? Supervisor.InitializeBlockPoolNetwork(1, 1) // not yet useful/implemented
   //supervisor ? Supervisor.InitializePeerNetwork(2, 1) // not yet useful/implemented
