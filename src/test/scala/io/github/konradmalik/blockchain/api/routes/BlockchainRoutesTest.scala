@@ -8,7 +8,8 @@ import spray.json.{JsArray, JsBoolean, JsObject, JsString}
 
 class BlockchainRoutesTest extends FlatSpecLike with Matchers with ScalatestRouteTest with BlockchainRoutes  {
 
-  val blockchain: ActorRef = system.actorOf(BlockchainActor.props(2), "blockchainActor")
+  override val blockchainClusterListener: ActorRef = ???
+  override val blockchain: ActorRef = system.actorOf(BlockchainActor.props(2), "blockchainActor")
 
   "Blockchain" should "return a json list of blocks and timestamp" in {
       Get("/blockchain/chain") ~> blockchainRoutes ~> check {
@@ -42,6 +43,5 @@ class BlockchainRoutesTest extends FlatSpecLike with Matchers with ScalatestRout
       assert(block.getFields("data").head.asInstanceOf[JsString].value == "dummy_data")
     }
   }
-
 
 }

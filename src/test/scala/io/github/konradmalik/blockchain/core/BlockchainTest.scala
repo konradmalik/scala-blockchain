@@ -62,4 +62,16 @@ class BlockchainTest extends FlatSpec with Matchers {
     bc.getBlockchain.length shouldBe 3
   }
 
+  "Blockchain's list of blocks" should "be replaceable" in {
+    assert(bc.replaceBlockchain(List.empty[Block]))
+    bc.length shouldBe 0
+
+    assert(!bc.replaceBlockchain(List(gBlock,gBlock)))
+    bc.length shouldBe 0
+
+    assert(bc.replaceBlockchain(List(gBlock, bc.validateBlock(Block(1,gBlock.hash, "data", 0)))))
+    bc.length shouldBe 2
+
+  }
+
 }

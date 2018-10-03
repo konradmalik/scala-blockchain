@@ -6,8 +6,8 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import io.github.konradmalik.blockchain.api._
-import io.github.konradmalik.blockchain.api.actors.BlockchainActor
 import io.github.konradmalik.blockchain.api.actors.BlockchainActor.BlockMsg
+import io.github.konradmalik.blockchain.api.actors.{BlockchainActor, BlockchainClusterListener}
 import spray.json._
 
 import scala.concurrent.Future
@@ -16,8 +16,6 @@ trait BlockchainRoutes extends JsonSupport {
 
   implicit def system: ActorSystem
 
-  def blockchain: ActorRef
-
   lazy val blockchainRoutes: Route =
     pathPrefix("blockchain") {
       concat(
@@ -25,7 +23,7 @@ trait BlockchainRoutes extends JsonSupport {
           get {
             val chainFuture = blockchain ? BlockchainActor.GetChain(System.currentTimeMillis())
             onSuccess(chainFuture.mapTo[BlockchainActor.Chain]) { chain =>
-              complete(chain.toJson)
+              complete(StatusCodes.OK, chain.toJson)
             }
           }
         },
@@ -33,7 +31,7 @@ trait BlockchainRoutes extends JsonSupport {
           get {
             val validFuture = blockchain ? BlockchainActor.IsChainValid(System.currentTimeMillis())
             onSuccess(validFuture.mapTo[BlockchainActor.ChainValidity]) { validity =>
-              complete(validity.toJson)
+              complete(StatusCodes.OK, validity.toJson)
             }
           }
         },
@@ -41,7 +39,15 @@ trait BlockchainRoutes extends JsonSupport {
           get {
             val blockFuture = blockchain ? BlockchainActor.GetLastBlock(System.currentTimeMillis())
             onSuccess(blockFuture.mapTo[BlockchainActor.BlockMsg]) { msg =>
-              complete(msg.toJson)
+              complete(StatusCodes.OK, msg.toJson)
+            }
+          }
+        },
+        path("refresh") {
+          get {
+            val newLength = (blockchainClusterListener ? BlockchainClusterListener.UpdateChain(System.currentTimeMillis())).mapTo[Int]
+            onSuccess(newLength) { l =>
+              complete(StatusCodes.OK, l.toString)
             }
           }
         },
@@ -58,4 +64,8 @@ trait BlockchainRoutes extends JsonSupport {
         }
       )
     }
+
+  def blockchain: ActorRef
+
+  def blockchainClusterListener: ActorRef
 }

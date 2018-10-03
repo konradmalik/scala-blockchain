@@ -17,18 +17,18 @@ object Server extends App with TypesafeConfig with BlockchainRoutes {
 
   val runningClusterAddress: String = if(args.length == 3) args(2) else ""
 
-  implicit val system: ActorSystem = ActorSystem("blockchainSystem", config)
+  override implicit val system: ActorSystem = ActorSystem("blockchainSystem", config)
   // Create an actor that handles cluster domain events
-  val blockchainClusterListener = system.actorOf(BlockchainClusterListener.props(runningClusterAddress), name = "blockchainClusterListener")
+  override val blockchainClusterListener: ActorRef = system.actorOf(BlockchainClusterListener.props(runningClusterAddress), name = BLOCKCHAIN_CLUSTER_ACTOR_NAME)
 
   implicit val materializer: ActorMaterializer = ActorMaterializer()
 
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
   // top level supervisor
-  val supervisor: ActorRef = system.actorOf(Supervisor.props(), "supervisor")
+  val supervisor: ActorRef = system.actorOf(Supervisor.props(), SUPERVISOR_ACTOR_NAME)
   // initialize required children
-  val blockchain = Await.result(
+  override val blockchain = Await.result(
     (supervisor ? Supervisor.InitializeBlockchain(System.currentTimeMillis()))
       .mapTo[InitializedBlockchain].map(_.actor), selectionTimeout
   )

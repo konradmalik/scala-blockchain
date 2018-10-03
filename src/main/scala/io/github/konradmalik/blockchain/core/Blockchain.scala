@@ -29,21 +29,33 @@ class Blockchain(proof: ProofProtocol) {
 
   def getBlockchain: List[Block] = chain.result()
 
+  def replaceBlockchain(newChain: List[Block]): Boolean = {
+    if(!checkChain(newChain))
+      false
+    else {
+      chain.clear()
+      chain.append(newChain: _*)
+      true
+    }
+  }
+
+
   def length: Int = chain.length
 
   def isChainValid: Boolean = {
     val chain = getBlockchain
 
-    @tailrec
-    def checkChain(chain: List[Block]): Boolean = {
-      chain match {
-        case Nil => true
-        case g +: Nil => g.previousHash.equals("0" * 64) && g.index == 0 && isBlockValid(g)
-        case a +: b +: tail => isBlockValid(a) && isBlockValid(b) && Blockchain.isValidLinkBetween(a, b) && checkChain(tail)
-      }
-    }
     // start
     checkChain(chain)
+  }
+
+  @tailrec
+  private def checkChain(chain: List[Block]): Boolean = {
+    chain match {
+      case Nil => true
+      case g +: Nil => g.previousHash.equals("0" * 64) && g.index == 0 && isBlockValid(g)
+      case a +: b +: tail => isBlockValid(a) && isBlockValid(b) && Blockchain.isValidLinkBetween(a, b) && checkChain(tail)
+    }
   }
 
   def validateBlock(block: Block): Block = {

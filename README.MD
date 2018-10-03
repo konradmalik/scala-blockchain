@@ -17,6 +17,8 @@ To start more nodes, one should provide host, port and URI string to one of the 
 ```{"timestamp":1537727402999,"valid":true}```
 * blockchain/latest - returns the latest block in the chain
 ```{"timestamp":1538329803076,"block":{"previousHash":"0000000000000000000000000000000000000000000000000000000000000000","timestamp":1538329701922,"nonce":61,"data":"Genesis","index":0}}```
+* blockchain/refresh - updates chain on the present node with the longest chain in the cluster, return length of that chain
+```2```
 
 ### POST:
 * blockchain/mine; data:String - creates new block with data = "data", mines it and returns timestamp and its json representation

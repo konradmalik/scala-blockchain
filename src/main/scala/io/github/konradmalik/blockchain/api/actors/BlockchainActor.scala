@@ -18,6 +18,7 @@ object BlockchainActor {
   final case class BlockMsg(timestamp: Long, block: Block)
   final case class Chain(timestamp: Long, chain: Blockchain)
   final case class ChainValidity(timestamp: Long, valid: Boolean)
+  final case class ReplaceChain(timestamp: Long, newChain: List[Block])
 }
 
 class BlockchainActor(proof: ProofProtocol) extends Blockchain(proof) with Actor with ActorLogging {
@@ -30,6 +31,10 @@ class BlockchainActor(proof: ProofProtocol) extends Blockchain(proof) with Actor
     case GetChain(rId) => sender() ! Chain(rId, this)
     case GetLastBlock(rId) => sender() ! BlockMsg(rId, getLastBlock)
     case IsChainValid(rId) => sender() ! ChainValidity(rId, isChainValid)
+    case ReplaceChain(ts, newChain) =>
+      log.info(s"Replacing chain; old: ${this.length}, new: ${newChain.length}")
+      val ifReplaced: Boolean = this.replaceBlockchain(newChain)
+      sender() ! ChainValidity(ts, ifReplaced)
 
     case MakeNewBlock(rId, data) =>
       val block = createNextBlock(data)
