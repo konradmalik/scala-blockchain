@@ -4,6 +4,8 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{TestKit, TestProbe}
 import org.scalatest.{FlatSpecLike, Matchers}
 import io.github.konradmalik.blockchain.api._
+import io.github.konradmalik.blockchain.core.Blockchain
+import io.github.konradmalik.blockchain.protocols.ProofOfWork
 
 class BlockchainActorTest extends TestKit(ActorSystem("blockchainActorTest")) with FlatSpecLike with Matchers {
 
@@ -33,5 +35,14 @@ class BlockchainActorTest extends TestKit(ActorSystem("blockchainActorTest")) wi
     val valid = probe.receiveOne(askTimeout.duration).asInstanceOf[BlockchainActor.ChainValidity]
     assert(valid.valid)
   }
+  it should "replace its out chain" in {
+    val newChain = new Blockchain(new ProofOfWork(3)).getBlockchain
+
+    blockchainActor.tell(BlockchainActor.ReplaceChain(5,newChain), probe.ref)
+    val valid = probe.receiveOne(askTimeout.duration).asInstanceOf[BlockchainActor.ChainValidity]
+    assert(valid.valid)
+    blockchainActor.tell(BlockchainActor.GetChain(6), probe.ref)
+    val chain = probe.receiveOne(askTimeout.duration).asInstanceOf[BlockchainActor.Chain]
+    assert(chain.chain.getBlockchain.size == 1)  }
 }
 
