@@ -44,8 +44,8 @@ trait BlockchainRoutes extends JsonSupport {
           }
         },
         path("refresh") {
-          get {
-            val newLength = (blockchainClusterListener ? BlockchainClusterListener.UpdateChain(System.currentTimeMillis())).mapTo[Int]
+          post {
+            val newLength = (blockchainClusterListener ? BlockchainClusterListener.RefreshChain(System.currentTimeMillis())).mapTo[Int]
             onSuccess(newLength) { l =>
               complete(StatusCodes.OK, l.toString)
             }

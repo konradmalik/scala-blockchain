@@ -6,11 +6,10 @@ import akka.cluster.{Cluster, MemberStatus}
 import akka.pattern.ask
 import io.github.konradmalik.blockchain.api._
 import io.github.konradmalik.blockchain.api.actors.BlockchainActor.{Chain, ChainLength, ChainValidity}
-import io.github.konradmalik.blockchain.api.actors.BlockchainClusterListener.{GetNodes, UpdateChain}
+import io.github.konradmalik.blockchain.api.actors.BlockchainClusterListener.{GetNodes, RefreshChain}
 import io.github.konradmalik.blockchain.core.Block
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success, Try}
 
@@ -19,7 +18,7 @@ object BlockchainClusterListener {
 
   final case class GetNodes(timestamp: Long)
 
-  final case class UpdateChain(timestamp: Long)
+  final case class RefreshChain(timestamp: Long)
 
 }
 
@@ -58,11 +57,11 @@ class BlockchainClusterListener(nodeAddress: String) extends Actor with ActorLog
       log.info("Member is Removed: {} after {}",
         member.address, previousStatus)
     case GetNodes(_) => sender ! nodes
-    case UpdateChain(ts: Long) => sender ! updateChain
+    case RefreshChain(ts: Long) => sender ! refreshChain
     case _: MemberEvent => log.info("Unknown member event ignored")
   }
 
-  def updateChain: Int = {
+  def refreshChain: Int = {
     val setOfFutures: Set[Future[ActorRef]] = nodes.map(a => context.actorSelection(s"${a.toString}/user/$SUPERVISOR_ACTOR_NAME/$BLOCKCHAIN_ACTOR_NAME").resolveOne())
     val futureSetOfBlockchainNodes: Future[Iterable[ActorRef]] = futuresToFuture(setOfFutures)
     // send getChain to each node
