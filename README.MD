@@ -2,6 +2,9 @@
 This repo is of course still work in progress and definetly is not complete/ready.
 Project created to learn akka, akka-http, blockchain etc.
 
+Master branch aims to be a general-purpose blockchain template.
+Koin branch aims to be a simple cryptocurrency called "Koin" implementation.
+
 # Running
 To start first node one should provide 2 args: host and port. Example:
 ```java -jar scala-blockchain-0.1-jar-with-dependencies.jar 127.0.0.1 9001```
