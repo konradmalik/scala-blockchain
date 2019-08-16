@@ -8,7 +8,7 @@ import spray.json.{JsArray, JsObject, JsString}
 
 class BlockchainRoutesTest extends FlatSpecLike with Matchers with ScalatestRouteTest with BlockchainRoutes {
 
-  override val blockchainClusterListener: ActorRef = system.actorOf(BlockchainClusterListener.props(""), name = "blockchainClusterActor")
+  override val blockchainClusterListener: ActorRef = system.actorOf(BlockchainClusterListener.props, name = "blockchainClusterActor")
   override val blockchain: ActorRef = system.actorOf(BlockchainActor.props(2), "blockchainActor")
 
   "Blockchain" should "return a json list of blocks" in {

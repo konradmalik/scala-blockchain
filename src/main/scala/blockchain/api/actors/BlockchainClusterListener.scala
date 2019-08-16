@@ -13,7 +13,9 @@ import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success, Try}
 
 object BlockchainClusterListener {
-  def props(nodeAddress: String) = Props(new BlockchainClusterListener(nodeAddress))
+  def props(nodeAddress: String) = Props(new BlockchainClusterListener(Some(nodeAddress)))
+
+  def props = Props(new BlockchainClusterListener(None))
 
   final case object GetNodes
 
@@ -21,16 +23,17 @@ object BlockchainClusterListener {
 
 }
 
-class BlockchainClusterListener(nodeAddress: String) extends Actor with ActorLogging {
+class BlockchainClusterListener(nodeAddress: Option[String]) extends Actor with ActorLogging {
 
   import blockchain.api._
 
   val cluster: Cluster = Cluster(context.system)
   // if existing node provided, then join it, else join itself (important!)
-  if (nodeAddress.nonEmpty)
-    cluster.join(AddressFromURIString(nodeAddress))
-  else
-    cluster.join(cluster.selfAddress)
+  nodeAddress match {
+    case Some(addr) =>
+      cluster.join(AddressFromURIString(addr))
+    case None => cluster.join(cluster.selfAddress)
+  }
 
   var nodes = Set.empty[Address]
 
