@@ -1,7 +1,6 @@
 package blockchain.json
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import blockchain.api.actors.BlockchainActor.{BlockMsg, Chain, ChainValidity}
 import blockchain.core.{Block, Blockchain}
 import spray.json.DefaultJsonProtocol
 
@@ -34,20 +33,4 @@ trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val blockchainJsonWriter: JsonWriter[Blockchain] = (b: Blockchain) =>
     JsArray(b.getBlockchain.toVector.map(_.toJson))
 
-  /**
-    * Chain
-    */
-  implicit val chainJsonWriter: JsonWriter[Chain] = (c: Chain) =>
-    JsObject("timestamp" -> JsNumber(c.timestamp), "blockchain" -> c.chain.toJson)
-
-  /**
-    * Chain validity
-    */
-  implicit val chainValidityJsonFormat: RootJsonFormat[ChainValidity] = jsonFormat2(ChainValidity)
-
-  /**
-    * BlockAdded
-    */
-  implicit val blockAddedJsonWriter: JsonWriter[BlockMsg] = (ba: BlockMsg) =>
-    JsObject("timestamp" -> JsNumber(ba.timestamp), "block" -> ba.block.toJson)
 }

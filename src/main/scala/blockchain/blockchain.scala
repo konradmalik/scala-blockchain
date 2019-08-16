@@ -2,8 +2,6 @@ import java.nio.charset.Charset
 
 import blockchain.core.Block
 
-import scala.collection.mutable
-
 package object blockchain {
 
   final val DIFFICULTY: Int = 2
@@ -13,6 +11,6 @@ package object blockchain {
 
   type Bytes = Array[Byte]
   type HexString = String
-  type Chain = mutable.ListBuffer[Block]
+  type Chain = List[Block]
 
 }

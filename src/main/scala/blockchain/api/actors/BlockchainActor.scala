@@ -1,33 +1,26 @@
 package blockchain.api.actors
 
 import akka.actor.{Actor, ActorLogging, Props}
+import blockchain.Chain
 import blockchain.api.ErrorMsg
 import blockchain.api.actors.BlockchainActor._
-import blockchain.core.{Block, Blockchain}
+import blockchain.core.Blockchain
 import blockchain.protocols.{ProofOfWork, ProofProtocol}
 
 object BlockchainActor {
   def props(difficulty: Int) = Props(new BlockchainActor(new ProofOfWork(difficulty)))
 
-  final case class GetLength(timestamp: Long)
+  final case object GetLength
 
-  final case class GetChain(timestamp: Long)
+  final case object GetBlockchain
 
-  final case class IsChainValid(timestamp: Long)
+  final case object IsChainValid
 
-  final case class GetLastBlock(timestamp: Long)
+  final case object GetLastBlock
 
-  final case class ChainLength(timestamp: Long, chainLength: Int)
+  final case class MakeNewBlock(data: String)
 
-  final case class MakeNewBlock(timestamp: Long, data: String)
-
-  final case class BlockMsg(timestamp: Long, block: Block)
-
-  final case class Chain(timestamp: Long, chain: Blockchain)
-
-  final case class ChainValidity(timestamp: Long, valid: Boolean)
-
-  final case class ReplaceChain(timestamp: Long, newChain: List[Block])
+  final case class ReplaceChain(newChain: Chain)
 
 }
 
@@ -37,26 +30,27 @@ class BlockchainActor(proof: ProofProtocol) extends Blockchain(proof) with Actor
   override def postStop(): Unit = log.info("{} stopped!", this.getClass.getSimpleName)
 
   override def receive: Receive = {
-    case GetLength(rId) => sender() ! ChainLength(rId, length)
-    case GetChain(rId) => sender() ! Chain(rId, this)
-    case GetLastBlock(rId) => sender() ! BlockMsg(rId, getLastBlock)
-    case IsChainValid(rId) => sender() ! ChainValidity(rId, isChainValid)
-    case ReplaceChain(ts, newChain) =>
+    case GetLength => sender() ! length
+    case GetBlockchain => sender() ! this
+    case GetLastBlock => sender() ! getLastBlock
+    case IsChainValid => sender() ! isChainValid
+    case ReplaceChain(newChain) =>
       log.info(s"Replacing chain; old: ${this.length}, new: ${newChain.length}")
       val ifReplaced: Boolean = this.replaceBlockchain(newChain)
-      sender() ! ChainValidity(ts, ifReplaced)
+      sender() ! ifReplaced
 
-    case MakeNewBlock(rId, data) =>
+    case MakeNewBlock(data) =>
       val block = createNextBlock(data)
       val validBlock = validateBlock(block)
       val isOk = addBlock(validBlock)
       if (isOk) {
-        log.info("Added block at: " + rId + " with data: " + data)
-        sender ! BlockMsg(rId, validBlock)
+        log.info("Added block at: " + block.timestamp + " with data: " + data)
+        sender ! validBlock
       }
       else {
-        log.error("Could not add block at: " + rId + " with data: " + data)
-        sender ! ErrorMsg(rId)
+        val message = "Could not add block at: " + block.timestamp + " with data: " + data
+        log.error(message)
+        sender ! ErrorMsg(message)
       }
   }
 }

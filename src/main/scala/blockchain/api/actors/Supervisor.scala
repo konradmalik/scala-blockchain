@@ -2,24 +2,21 @@ package blockchain.api.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef, DeadLetter, Props, Terminated}
 import blockchain.api.actors.Supervisor._
-import blockchain.api.routes.Success
 
 object Supervisor {
   def props() = Props(new Supervisor)
 
-  sealed trait Initialization
+  final case object InitializeBlockchain
 
-  final case class InitializeBlockchain(timestamp: Long) extends Initialization
+  final case class InitializedBlockchain(actor: ActorRef)
 
-  final case class InitializedBlockchain(timestamp: Long, actor: ActorRef) extends Success
+  final case object InitializePeer
 
-  final case class InitializePeer(timestamp: Long) extends Initialization
+  final case class InitializedPeer(actor: ActorRef)
 
-  final case class InitializedPeer(timestamp: Long, actor: ActorRef) extends Success
+  final case object InitializeBlockPool
 
-  final case class InitializeBlockPool(timestamp: Long) extends Initialization
-
-  final case class InitializedBlockPool(timestamp: Long, actor: ActorRef) extends Success
+  final case class InitializedBlockPool(actor: ActorRef)
 
 }
 
@@ -33,11 +30,11 @@ class Supervisor extends Actor with ActorLogging {
   override def postStop(): Unit = log.info("{} stopped!", this.getClass.getSimpleName)
 
   override def receive: Receive = {
-    case InitializeBlockchain(rId) => initializeBlockchain(rId)
+    case InitializeBlockchain => initializeBlockchain()
 
-    case InitializePeer(rId) => initializePeer(rId)
+    case InitializePeer => initializePeer()
 
-    case InitializeBlockPool(rId) => initializeBlockPool(rId)
+    case InitializeBlockPool => initializeBlockPool()
 
     case Terminated(actor) =>
       log.info("Network {} has been terminated", actor)
@@ -48,25 +45,25 @@ class Supervisor extends Actor with ActorLogging {
     case _ => log.info("Unknown message sent to the {} by {}", this.getClass.getSimpleName, sender())
   }
 
-  private def initializeBlockchain(requestId: Long): Unit = {
+  private def initializeBlockchain(): Unit = {
     val actor = context.actorOf(BlockchainActor.props(DIFFICULTY), BLOCKCHAIN_ACTOR_NAME)
     log.info("Created Blockchain, name {}", BLOCKCHAIN_ACTOR_NAME)
     context.watch(actor)
-    sender() ! InitializedBlockchain(requestId, actor)
+    sender() ! InitializedBlockchain(actor)
   }
 
-  private def initializePeer(requestId: Long): Unit = {
+  private def initializePeer(): Unit = {
     val actor = context.actorOf(PeerActor.props, PEER_ACTOR_NAME)
     log.info("Created Peer, name {}", PEER_ACTOR_NAME)
     context.watch(actor)
-    sender() ! InitializedPeer(requestId, actor)
+    sender() ! InitializedPeer(actor)
   }
 
-  private def initializeBlockPool(requestId: Long): Unit = {
+  private def initializeBlockPool(): Unit = {
     val actor = context.actorOf(BlockPoolActor.props, BLOCK_POOL_ACTOR_NAME)
     log.info("Created Peer, name {}", BLOCK_POOL_ACTOR_NAME)
     context.watch(actor)
-    sender() ! InitializedBlockPool(requestId, actor)
+    sender() ! InitializedBlockPool(actor)
   }
 }
 

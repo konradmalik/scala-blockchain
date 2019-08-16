@@ -13,7 +13,7 @@ class Blockchain(proof: ProofProtocol) extends JsonSupport {
   // add genesis
   private val genesis = validateBlock(Block(0L, "0" * 64, "Genesis", 0))
 
-  private val chain: Chain = ListBuffer[Block](genesis)
+  private val chain: ListBuffer[Block] = ListBuffer[Block](genesis)
 
   def addBlock(block: Block): Boolean = {
     if (!isBlockValid(block) || !Blockchain.isValidLinkBetween(getLastBlock, block))
@@ -26,9 +26,9 @@ class Blockchain(proof: ProofProtocol) extends JsonSupport {
 
   def getLastBlock: Block = getBlockchain.last
 
-  def getBlockchain: List[Block] = chain.result()
+  def getBlockchain: Chain = chain.result()
 
-  def replaceBlockchain(newChain: List[Block]): Boolean = {
+  def replaceBlockchain(newChain: Chain): Boolean = {
     if (!checkChain(newChain))
       false
     else {
@@ -49,7 +49,7 @@ class Blockchain(proof: ProofProtocol) extends JsonSupport {
   }
 
   @tailrec
-  private def checkChain(chain: List[Block]): Boolean = {
+  private def checkChain(chain: Chain): Boolean = {
     chain match {
       case Nil => true
       case g +: Nil => g.previousHash.equals("0" * 64) && g.index == 0 && isBlockValid(g)

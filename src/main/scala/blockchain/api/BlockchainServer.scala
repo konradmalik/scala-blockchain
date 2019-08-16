@@ -29,7 +29,7 @@ object BlockchainServer extends App with TypesafeConfig with BlockchainRoutes {
   val supervisor: ActorRef = system.actorOf(Supervisor.props(), SUPERVISOR_ACTOR_NAME)
   // initialize required children
   override val blockchain = Await.result(
-    (supervisor ? Supervisor.InitializeBlockchain(System.currentTimeMillis()))
+    (supervisor ? Supervisor.InitializeBlockchain)
       .mapTo[InitializedBlockchain].map(_.actor), selectionTimeout
   )
   //supervisor ? Supervisor.InitializeBlockPoolNetwork(1, 1) // not yet useful/implemented

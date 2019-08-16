@@ -17,6 +17,6 @@ package object api {
   implicit val askTimeout: Timeout = Timeout(10 seconds)
   final val selectionTimeout: Duration = 10 seconds
 
-  final case class ErrorMsg(timestamp: Long)
+  final case class ErrorMsg(msg: String)
 
 }
