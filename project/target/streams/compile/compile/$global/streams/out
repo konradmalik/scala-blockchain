@@ -1,0 +1,4 @@
+[0m[[0m[31merror[0m] [0m[0m/home/konrad/Science/Programming/Akka/scala-blockchain/project/Dependencies.scala:30:59: ';' expected but ',' found.[0m
+[0m[[0m[31merror[0m] [0m[0m    "org.scalatest" %% "scalatest" % "3.2.0-SNAP10" % Test,[0m
+[0m[[0m[31merror[0m] [0m[0m                                                          ^[0m
+[0m[[0m[31merror[0m] [0m[0mone error found[0m
