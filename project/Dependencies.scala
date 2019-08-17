@@ -10,7 +10,6 @@ object Dependencies {
       "com.typesafe.akka" %% "akka-cluster-metrics" % version,
       "com.typesafe.akka" %% "akka-cluster-tools" % version,
       "com.typesafe.akka" %% "akka-stream" % version,
-      "com.typesafe.akka" %% "akka-testkit" % version % Test,
       "com.typesafe.akka" %% "akka-multi-node-testkit" % version % Test
     )
   }
@@ -26,11 +25,8 @@ object Dependencies {
 
   lazy val sprayJson = "io.spray" %% "spray-json" % "1.3.5"
 
-  lazy val scalaTest = Seq(
-    "org.scalatest" %% "scalatest" % "3.2.0-SNAP10" % Test,
-    // https://github.com/scalatest/scalatest/issues/1112#issuecomment-447977007
-    "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
-  )
+  lazy val scalaTest = "org.scalatest" %% "scalatest" % "3.0.7" % Test
+
 
 }
 

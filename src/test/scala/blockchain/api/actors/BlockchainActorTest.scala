@@ -1,48 +1,51 @@
 package blockchain.api.actors
 
 import akka.actor.{ActorRef, ActorSystem}
-import akka.testkit.{TestKit, TestProbe}
+import akka.testkit.{ImplicitSender, TestKit}
 import blockchain.api._
 import blockchain.core.{Block, Blockchain}
 import blockchain.protocols.ProofOfWork
-import org.scalatest.{FlatSpecLike, Matchers}
+import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
 
-class BlockchainActorTest extends TestKit(ActorSystem("blockchainActorTest")) with FlatSpecLike with Matchers {
+class BlockchainActorTest extends TestKit(ActorSystem("test")) with ImplicitSender with FlatSpecLike with Matchers with BeforeAndAfterAll {
 
-  val probe = TestProbe()
+  override def afterAll: Unit = {
+    TestKit.shutdownActorSystem(system)
+  }
+
   val blockchainActor: ActorRef = system.actorOf(BlockchainActor.props(2), "blockchainActor")
 
   "BlockchainActor" should "give length" in {
-    blockchainActor.tell(BlockchainActor.GetLength, probe.ref)
+    blockchainActor ! BlockchainActor.GetLength
 
-    probe.expectMsg(1)
+    expectMsg(1)
   }
   it should "mine new block with no problems" in {
-    blockchainActor.tell(BlockchainActor.MakeNewBlock("data"), probe.ref)
-    val addedBlock = probe.receiveOne(askTimeout.duration).asInstanceOf[Block]
+    blockchainActor ! BlockchainActor.MakeNewBlock("data")
+    val addedBlock = receiveOne(askTimeout.duration).asInstanceOf[Block]
     assert(addedBlock.data == "data")
 
-    blockchainActor.tell(BlockchainActor.GetLength, probe.ref)
-    probe.expectMsg(2)
+    blockchainActor ! BlockchainActor.GetLength
+    expectMsg(2)
   }
   it should "return list of blocks" in {
-    blockchainActor.tell(BlockchainActor.GetBlockchain, probe.ref)
-    val chain = probe.receiveOne(askTimeout.duration).asInstanceOf[Blockchain]
+    blockchainActor ! BlockchainActor.GetBlockchain
+    val chain = receiveOne(askTimeout.duration).asInstanceOf[Blockchain]
     assert(chain.getBlockchain.size == 2)
   }
   it should "return if its valid" in {
-    blockchainActor.tell(BlockchainActor.IsChainValid, probe.ref)
-    val valid = probe.receiveOne(askTimeout.duration).asInstanceOf[Boolean]
+    blockchainActor ! BlockchainActor.IsChainValid
+    val valid = receiveOne(askTimeout.duration).asInstanceOf[Boolean]
     assert(valid)
   }
   it should "replace its out chain" in {
     val newChain = new Blockchain(new ProofOfWork(3)).getBlockchain
 
-    blockchainActor.tell(BlockchainActor.ReplaceChain(newChain), probe.ref)
-    val valid = probe.receiveOne(askTimeout.duration).asInstanceOf[Boolean]
+    blockchainActor ! BlockchainActor.ReplaceChain(newChain)
+    val valid = receiveOne(askTimeout.duration).asInstanceOf[Boolean]
     assert(valid)
-    blockchainActor.tell(BlockchainActor.GetBlockchain, probe.ref)
-    val chain = probe.receiveOne(askTimeout.duration).asInstanceOf[Blockchain]
+    blockchainActor ! BlockchainActor.GetBlockchain
+    val chain = receiveOne(askTimeout.duration).asInstanceOf[Blockchain]
     assert(chain.getBlockchain.size == 1)
   }
 }

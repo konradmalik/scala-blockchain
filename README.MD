@@ -5,6 +5,10 @@ Project created to learn akka, akka-http, blockchain etc.
 Master branch aims to be a general-purpose blockchain template.
 Koin branch aims to be a simple cryptocurrency called "Koin" implementation.
 
+# Testing
+Tests work as usual, but to run multi-jvm tests of akka-cluster, you need to specifically run 
+```sbt multi-jvm:test```
+
 # Running
 To start first node one should provide 2 args: host and port. Example:
 ```java -jar scala-blockchain-0.1-jar-with-dependencies.jar 127.0.0.1 9001```

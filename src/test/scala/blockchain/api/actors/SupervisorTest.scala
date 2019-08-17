@@ -1,34 +1,37 @@
 package blockchain.api.actors
 
 import akka.actor.{ActorRef, ActorSystem}
-import akka.testkit.{TestKit, TestProbe}
+import akka.testkit.{ImplicitSender, TestKit}
 import blockchain.api.actors.Supervisor.{InitializedBlockPool, InitializedBlockchain, InitializedPeer}
-import org.scalatest.{FlatSpecLike, Matchers}
+import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
 
-class SupervisorTest extends TestKit(ActorSystem("supervisorTest")) with FlatSpecLike with Matchers {
+class SupervisorTest extends TestKit(ActorSystem("test")) with ImplicitSender with FlatSpecLike with Matchers with BeforeAndAfterAll {
 
-  val probe = TestProbe()
+  override def afterAll: Unit = {
+    TestKit.shutdownActorSystem(system)
+  }
+
   val supervisorActor: ActorRef = system.actorOf(Supervisor.props(), "supervisor")
 
   "Supervisor" should "be able to start Blockchain" in {
 
-    supervisorActor.tell(Supervisor.InitializeBlockchain, probe.ref)
-    probe.expectMsgClass(classOf[InitializedBlockchain])
+    supervisorActor ! Supervisor.InitializeBlockchain
+    expectMsgClass(classOf[InitializedBlockchain])
   }
   it should "be able to start Peer" in {
 
-    supervisorActor.tell(Supervisor.InitializePeer, probe.ref)
-    probe.expectMsgClass(classOf[InitializedPeer])
+    supervisorActor ! Supervisor.InitializePeer
+    expectMsgClass(classOf[InitializedPeer])
   }
   it should "be able to start BlockPool" in {
 
-    supervisorActor.tell(Supervisor.InitializeBlockPool, probe.ref)
-    probe.expectMsgClass(classOf[InitializedBlockPool])
+    supervisorActor ! Supervisor.InitializeBlockPool
+    expectMsgClass(classOf[InitializedBlockPool])
   }
   it should "ignore unknown messages" in {
 
-    supervisorActor.tell("random bad message", probe.ref)
-    probe.expectNoMessage
+    supervisorActor ! "random bad message"
+    expectNoMessage
   }
 }
 

@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import blockchain.api._
-import blockchain.api.actors.{BlockchainActor, BlockchainClusterListener}
+import blockchain.api.actors.BlockchainActor
 import blockchain.core.{Block, Blockchain}
 import blockchain.json.JsonSupport
 import spray.json._
@@ -44,14 +44,6 @@ trait BlockchainRoutes extends JsonSupport {
             }
           }
         },
-        path("refresh") {
-          post {
-            val newLength = (blockchainClusterListener ? BlockchainClusterListener.RefreshChain).mapTo[Int]
-            onSuccess(newLength) { l =>
-              complete(StatusCodes.OK, l.toString)
-            }
-          }
-        },
         path("mine") {
           post {
             entity(as[String]) { entity =>
@@ -67,6 +59,4 @@ trait BlockchainRoutes extends JsonSupport {
     }
 
   def blockchain: ActorRef
-
-  def blockchainClusterListener: ActorRef
 }

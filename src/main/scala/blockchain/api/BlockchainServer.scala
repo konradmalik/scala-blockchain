@@ -2,18 +2,20 @@ package blockchain.api
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.Http
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import blockchain.api.actors.Supervisor.InitializedBlockchain
 import blockchain.api.actors.{BlockchainClusterListener, Supervisor}
-import blockchain.api.routes.BlockchainRoutes
+import blockchain.api.routes.{BlockchainClusterRoutes, BlockchainRoutes}
 import blockchain.util.TypesafeConfig
 
 import scala.concurrent.{Await, ExecutionContextExecutor}
 import scala.io.StdIn
 
-object BlockchainServer extends App with TypesafeConfig with BlockchainRoutes {
+object BlockchainServer extends App with TypesafeConfig
+  with BlockchainRoutes with BlockchainClusterRoutes {
 
   val runningClusterAddress: String = if (args.length == 3) args(2) else ""
 
@@ -36,7 +38,7 @@ object BlockchainServer extends App with TypesafeConfig with BlockchainRoutes {
   //supervisor ? Supervisor.InitializePeerNetwork(2, 1) // not yet useful/implemented
 
   // rest api
-  val routes: Route = blockchainRoutes
+  val routes: Route = concat(blockchainRoutes, blockchainClusterRoutes)
 
   val bindingFuture = Http().bindAndHandle(routes, config.getString("akka.http.host"), config.getInt("akka.http.port"))
 
