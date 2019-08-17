@@ -15,7 +15,9 @@ class BlockchainClusterRoutesTest extends MultiNodeSpec(BlockchainMultiNodeConfi
   with STMultiNodeSpec with ImplicitSender {
 
   import BlockchainMultiNodeConfig._
+
   import scala.concurrent.duration._
+
   implicit val askTimeout: Timeout = Timeout(10 seconds)
 
   def initialParticipants: Int = roles.size
@@ -42,7 +44,6 @@ class BlockchainClusterRoutesTest extends MultiNodeSpec(BlockchainMultiNodeConfi
         println(otherBCL.pathString)
         blockchainClusterListener ! BlockchainClusterListener.GetNodes
         expectMsg(askTimeout.duration, 2)
-
       }
 
       runOn(node2) {
