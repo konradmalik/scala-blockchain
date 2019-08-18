@@ -27,15 +27,20 @@ class BlockchainClusterListener(nodeAddress: Option[String]) extends Actor with 
 
   import blockchain.api._
 
+  var nodes = Set.empty[Address]
+
   val cluster: Cluster = Cluster(context.system)
   // if existing node provided, then join it, else join itself (important!)
   nodeAddress match {
     case Some(addr) =>
-      cluster.join(AddressFromURIString(addr))
-    case None => cluster.join(cluster.selfAddress)
+      val address = AddressFromURIString(addr)
+      cluster.join(address)
+      nodes += address
+    case None =>
+      cluster.join(cluster.selfAddress)
+      nodes += cluster.selfAddress
   }
 
-  var nodes = Set.empty[Address]
 
   // subscribe to cluster changes, re-subscribe when restart
   override def preStart(): Unit = {

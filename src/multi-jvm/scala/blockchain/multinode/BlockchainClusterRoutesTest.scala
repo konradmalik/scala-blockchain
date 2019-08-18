@@ -22,7 +22,6 @@ class BlockchainClusterRoutesTest extends MultiNodeSpec(BlockchainMultiNodeConfi
 
   def initialParticipants: Int = roles.size
 
-  val blockchainClusterListener: ActorRef = system.actorOf(BlockchainClusterListener.props, name = "blockchainClusterListener")
   // top level supervisor
   val supervisor: ActorRef = system.actorOf(Supervisor.props(), "supervisor")
   // initialize required children
@@ -35,23 +34,33 @@ class BlockchainClusterRoutesTest extends MultiNodeSpec(BlockchainMultiNodeConfi
       enterBarrier("startup")
     }
 
-    "send to and receive from a remote node" in {
+    "join self-single cluster when no nodes provided" in {
       runOn(node1) {
-        println(node(node1).address)
+        val blockchainClusterListener: ActorRef = system.actorOf(BlockchainClusterListener.props, name = "blockchainClusterListener")
         enterBarrier("deployed")
-
-        val otherBCL = system.actorSelection(node(node2) / "user" / "blockchainClusterListener")
-        println(otherBCL.pathString)
         blockchainClusterListener ! BlockchainClusterListener.GetNodes
-        expectMsg(askTimeout.duration, 2)
+        expectMsg(askTimeout.duration, Set(node(node1).address))
       }
-
-      runOn(node2) {
-        println(node(node2).address)
-        enterBarrier("deployed")
-      }
-
-      enterBarrier("finished")
     }
+
+    "join new cluster when asked" in {
+      runOn(node2) {
+        val blockchainClusterListener: ActorRef = system.actorOf(BlockchainClusterListener.props(node(node1).address.toString), name = "blockchainClusterListener")
+        enterBarrier("deployed")
+        Thread.sleep(askTimeout.duration._1 * 1000 / 2)
+        blockchainClusterListener ! BlockchainClusterListener.GetNodes
+        expectMsg(askTimeout.duration, Set(node(node1).address, node(node2).address))
+      }
+
+      runOn(node1) {
+        val blockchainClusterListener = system.actorSelection(node(node1) / "user" / "blockchainClusterListener")
+        Thread.sleep(askTimeout.duration._1 * 1000 / 2)
+        blockchainClusterListener ! BlockchainClusterListener.GetNodes
+        expectMsg(askTimeout.duration, Set(node(node1).address, node(node2).address))
+      }
+
+    }
+
+    enterBarrier("finished")
   }
 }
