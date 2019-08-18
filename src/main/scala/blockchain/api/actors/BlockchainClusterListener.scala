@@ -6,7 +6,6 @@ import akka.cluster.{Cluster, MemberStatus}
 import akka.pattern.ask
 import blockchain.Chain
 import blockchain.api.actors.BlockchainClusterListener.{GetNodes, RefreshChain}
-import blockchain.core.Blockchain
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
@@ -83,7 +82,7 @@ class BlockchainClusterListener(nodeAddress: Option[String]) extends Actor with 
     } else {
       // get chain from longest actor
       val futureLongestChain: Future[Chain] = futureLongestActor
-        .flatMap(p => (p._1 ? BlockchainActor.GetBlockchain).mapTo[Blockchain].map(_.getBlockchain))
+        .flatMap(p => (p._1 ? BlockchainActor.GetChain).mapTo[Chain])
       val futureLongestChainLength: Future[Int] = futureLongestActor.map(_._2)
       // replace chain in shorter actors
       // but we must wait for length and chain here

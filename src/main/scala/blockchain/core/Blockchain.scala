@@ -74,7 +74,7 @@ class Blockchain(proof: ProofProtocol) extends JsonSupport {
     Block(lb.index + 1, lb.hash, data, 0)
   }
 
-  override def toString: String = blockchainJsonWriter.write(this).compactPrint
+  override def toString: String = chainJsonWriter.write(getBlockchain).compactPrint
 }
 
 object Blockchain {

@@ -12,7 +12,7 @@ object BlockchainActor {
 
   final case object GetLength
 
-  final case object GetBlockchain
+  final case object GetChain
 
   final case object IsChainValid
 
@@ -31,7 +31,7 @@ class BlockchainActor(proof: ProofProtocol) extends Blockchain(proof) with Actor
 
   override def receive: Receive = {
     case GetLength => sender() ! length
-    case GetBlockchain => sender() ! this
+    case GetChain => sender() ! this.getBlockchain
     case GetLastBlock => sender() ! getLastBlock
     case IsChainValid => sender() ! isChainValid
     case ReplaceChain(newChain) =>

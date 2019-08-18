@@ -5,7 +5,8 @@ import akka.remote.testkit.MultiNodeSpec
 import akka.testkit.ImplicitSender
 import akka.util.Timeout
 import blockchain.api.actors.Supervisor.InitializedBlockchain
-import blockchain.api.actors.{BlockchainClusterListener, Supervisor}
+import blockchain.api.actors.{BlockchainActor, BlockchainClusterListener, Supervisor}
+import blockchain.core.Block
 
 class BlockChainClusterMultiJvmNode1 extends BlockchainClusterRoutesTest
 
@@ -22,11 +23,13 @@ class BlockchainClusterRoutesTest extends MultiNodeSpec(BlockchainMultiNodeConfi
 
   def initialParticipants: Int = roles.size
 
-  // top level supervisor
-  val supervisor: ActorRef = system.actorOf(Supervisor.props(), "supervisor")
-  // initialize required children
-  supervisor ! Supervisor.InitializeBlockchain
-  val blockchain = receiveOne(askTimeout.duration).asInstanceOf[InitializedBlockchain].actor
+  runOn(node1, node2) {
+    // top level supervisor
+    val supervisor: ActorRef = system.actorOf(Supervisor.props(), "supervisor")
+    // initialize required children
+    supervisor ! Supervisor.InitializeBlockchain
+    val blockchain = receiveOne(askTimeout.duration).asInstanceOf[InitializedBlockchain].actor
+  }
 
   "A BlockchainClusterRoutesTest" must {
 
@@ -57,6 +60,26 @@ class BlockchainClusterRoutesTest extends MultiNodeSpec(BlockchainMultiNodeConfi
         Thread.sleep(askTimeout.duration._1 * 1000 / 2)
         blockchainClusterListener ! BlockchainClusterListener.GetNodes
         expectMsg(askTimeout.duration, Set(node(node1).address, node(node2).address))
+      }
+
+    }
+
+    "properly update chain on out-of-date node" in {
+      runOn(node1) {
+        val blockchain = system.actorSelection(node(node1) / "user" / "supervisor" / "blockchain")
+        blockchain ! BlockchainActor.MakeNewBlock("test")
+        val newBlock = receiveOne(askTimeout.duration).asInstanceOf[Block]
+        assert(newBlock.data == "test")
+      }
+
+      runOn(node2) {
+        val blockchainClusterListener = system.actorSelection(node(node2) / "user" / "blockchainClusterListener")
+        blockchainClusterListener ! BlockchainClusterListener.RefreshChain
+        val maxLength = receiveOne(askTimeout.duration).asInstanceOf[Int]
+        val blockchain = system.actorSelection(node(node2) / "user" / "supervisor" / "blockchain")
+        blockchain ! BlockchainActor.GetLength
+        val newLength = receiveOne(askTimeout.duration).asInstanceOf[Int]
+        assert(newLength == maxLength)
       }
 
     }

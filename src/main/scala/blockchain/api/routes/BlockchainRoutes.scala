@@ -5,9 +5,10 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
+import blockchain.Chain
 import blockchain.api._
 import blockchain.api.actors.BlockchainActor
-import blockchain.core.{Block, Blockchain}
+import blockchain.core.Block
 import blockchain.json.JsonSupport
 import spray.json._
 
@@ -22,8 +23,8 @@ trait BlockchainRoutes extends JsonSupport {
       concat(
         path("chain") {
           get {
-            val chainFuture = blockchain ? BlockchainActor.GetBlockchain
-            onSuccess(chainFuture.mapTo[Blockchain]) { chain =>
+            val chainFuture = blockchain ? BlockchainActor.GetChain
+            onSuccess(chainFuture.mapTo[Chain]) { chain =>
               complete(StatusCodes.OK, chain.toJson)
             }
           }

@@ -2,6 +2,7 @@ package blockchain.api.actors
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{ImplicitSender, TestKit}
+import blockchain.Chain
 import blockchain.api._
 import blockchain.core.{Block, Blockchain}
 import blockchain.protocols.ProofOfWork
@@ -29,9 +30,9 @@ class BlockchainActorTest extends TestKit(ActorSystem("test")) with ImplicitSend
     expectMsg(2)
   }
   it should "return list of blocks" in {
-    blockchainActor ! BlockchainActor.GetBlockchain
-    val chain = receiveOne(askTimeout.duration).asInstanceOf[Blockchain]
-    assert(chain.getBlockchain.size == 2)
+    blockchainActor ! BlockchainActor.GetChain
+    val chain = receiveOne(askTimeout.duration).asInstanceOf[Chain]
+    assert(chain.size == 2)
   }
   it should "return if its valid" in {
     blockchainActor ! BlockchainActor.IsChainValid
@@ -44,9 +45,9 @@ class BlockchainActorTest extends TestKit(ActorSystem("test")) with ImplicitSend
     blockchainActor ! BlockchainActor.ReplaceChain(newChain)
     val valid = receiveOne(askTimeout.duration).asInstanceOf[Boolean]
     assert(valid)
-    blockchainActor ! BlockchainActor.GetBlockchain
-    val chain = receiveOne(askTimeout.duration).asInstanceOf[Blockchain]
-    assert(chain.getBlockchain.size == 1)
+    blockchainActor ! BlockchainActor.GetChain
+    val chain = receiveOne(askTimeout.duration).asInstanceOf[Chain]
+    assert(chain.size == 1)
   }
 }
 

@@ -4,13 +4,12 @@ import java.util.Calendar
 
 import blockchain.HexString
 import blockchain.crypto.SHA256
-import blockchain.json.JsonSupport
 
-class Block(val index: Long,
-            val previousHash: HexString,
-            val data: String,
-            val timestamp: Long,
-            val nonce: Int) extends JsonSupport with Serializable {
+case class Block(index: Long,
+                 previousHash: HexString,
+                 data: String,
+                 timestamp: Long,
+                 nonce: Int) {
 
   val hash: HexString = hashBlock
 
@@ -21,9 +20,6 @@ class Block(val index: Long,
   def hashBlock: HexString = {
     SHA256.hash(index, previousHash, data, timestamp, nonce)
   }
-
-  /** String representation of the block */
-  override def toString: String = blockJsonWriter.write(this).compactPrint
 
 }
 
