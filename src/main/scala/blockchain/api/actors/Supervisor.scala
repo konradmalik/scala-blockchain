@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorLogging, ActorRef, DeadLetter, Props, Terminated}
 import blockchain.api.actors.Supervisor._
 
 object Supervisor {
-  def props() = Props(new Supervisor)
+  def props = Props(new Supervisor)
 
   final case object InitializeBlockchain
 

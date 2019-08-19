@@ -11,7 +11,7 @@ class SupervisorTest extends TestKit(ActorSystem("test")) with ImplicitSender wi
     TestKit.shutdownActorSystem(system)
   }
 
-  val supervisorActor: ActorRef = system.actorOf(Supervisor.props(), "supervisor")
+  val supervisorActor: ActorRef = system.actorOf(Supervisor.props, "supervisor")
 
   "Supervisor" should "be able to start Blockchain" in {
 

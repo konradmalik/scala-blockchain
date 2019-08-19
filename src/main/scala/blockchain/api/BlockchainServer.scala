@@ -37,7 +37,7 @@ object BlockchainServer extends App with ServerConfig
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
   // top level supervisor
-  val supervisor: ActorRef = system.actorOf(Supervisor.props(), SUPERVISOR_ACTOR_NAME)
+  val supervisor: ActorRef = system.actorOf(Supervisor.props, SUPERVISOR_ACTOR_NAME)
   // initialize required children
   override val blockchain = Await.result(
     (supervisor ? Supervisor.InitializeBlockchain)
