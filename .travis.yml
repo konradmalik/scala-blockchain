@@ -8,7 +8,6 @@ cache:
     - $HOME/.sbt
 
 scala:
-   - 2.11.12
    - 2.12.9
 
 jobs:
