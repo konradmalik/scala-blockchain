@@ -15,7 +15,7 @@ Tests work as usual, but to run multi-jvm tests of akka-cluster, you need to spe
 To start first node one should provide 3 args: host http api port and cluster tcp port. Example:
 ```java -jar scala-blockchain-0.1-jar-with-dependencies.jar 127.0.0.1 9001 2552```
 To start more nodes, one should provide above and "host:cluster-port" to one of the already running nodes. Example:
-```java -jar scala-blockchain-0.1-jar-with-dependencies.jar 127.0.0.1 9002 2553 127.0.0.1:2552
+```java -jar scala-blockchain-0.1-jar-with-dependencies.jar 127.0.0.1 9002 2553 127.0.0.1:2552```
 
 # API (json based)
 ## Blockchain
@@ -36,5 +36,8 @@ To start more nodes, one should provide above and "host:cluster-port" to one of 
 # Credits
 ##### * Some code/ideas borrowed from this great repo: https://github.com/fluency03/blockchain-in-scala
 ##### * Other ideas based on the course that I'm completing right now: https://www.udemy.com/build-your-blockchain-az/?start=0com/build-your-blockchain-az/?start=0
+
+```
+
 
 ```
