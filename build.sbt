@@ -10,7 +10,7 @@ lazy val root = project
   .in(file("."))
   .settings(multiJvmSettings: _*)
   .settings(
-    name := "Scala Akka Blockchain",
+    name := "scala-akka-blockchain",
     libraryDependencies += sprayJson,
     libraryDependencies ++= akka,
     libraryDependencies ++= akkaHttp,

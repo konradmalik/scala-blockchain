@@ -9,19 +9,28 @@ import akka.stream.ActorMaterializer
 import blockchain.api.actors.Supervisor.InitializedBlockchain
 import blockchain.api.actors.{BlockchainClusterListener, Supervisor}
 import blockchain.api.routes.{BlockchainClusterRoutes, BlockchainRoutes}
-import blockchain.util.TypesafeConfig
+import blockchain.util.ServerConfig
 
 import scala.concurrent.{Await, ExecutionContextExecutor}
 import scala.io.StdIn
 
-object BlockchainServer extends App with TypesafeConfig
+object BlockchainServer extends App with ServerConfig
   with BlockchainRoutes with BlockchainClusterRoutes {
 
-  val runningClusterAddress: String = if (args.length == 3) args(2) else ""
+  if (args.length < 3) {
+    println("Please provide at least: hostname http-port akka-cluster-port")
+    System.exit(1)
+  } else {
+    println(s"Provided args: ${args.mkString(";")}")
+  }
 
-  override implicit val system: ActorSystem = ActorSystem("blockchainSystem", config)
+  val AKKA_PROTOCOL = "akka.tcp"
+  val ACTOR_SYSTEM_NAME = "blockchainSystem"
+  val RUNNING_CLUSTER_ADDRESS: Option[String] = if (args.length > 3) Some(s"$AKKA_PROTOCOL://$ACTOR_SYSTEM_NAME@${args(3)}") else None
+
+  override implicit val system: ActorSystem = ActorSystem(ACTOR_SYSTEM_NAME, config)
   // Create an actor that handles cluster domain events
-  override val blockchainClusterListener: ActorRef = system.actorOf(BlockchainClusterListener.props(runningClusterAddress), name = BLOCKCHAIN_CLUSTER_ACTOR_NAME)
+  override val blockchainClusterListener: ActorRef = system.actorOf(BlockchainClusterListener.props(RUNNING_CLUSTER_ADDRESS), name = BLOCKCHAIN_CLUSTER_ACTOR_NAME)
 
   implicit val materializer: ActorMaterializer = ActorMaterializer()
 

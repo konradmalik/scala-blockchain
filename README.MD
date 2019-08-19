@@ -10,10 +10,10 @@ Tests work as usual, but to run multi-jvm tests of akka-cluster, you need to spe
 ```sbt multi-jvm:test```
 
 # Running
-To start first node one should provide 2 args: host and port. Example:
-```java -jar scala-blockchain-0.1-jar-with-dependencies.jar 127.0.0.1 9001```
-To start more nodes, one should provide host, port and URI string to one of the already running nodes. Example:
-```java -jar scala-blockchain-0.1-jar-with-dependencies.jar 127.0.0.1 9002 akka://blockchainSystem@127.0.0.1:9001```
+To start first node one should provide 3 args: host http api port and cluster tcp port. Example:
+```java -jar scala-blockchain-0.1-jar-with-dependencies.jar 127.0.0.1 9001 2552```
+To start more nodes, one should provide above and "host:cluster-port" to one of the already running nodes. Example:
+```java -jar scala-blockchain-0.1-jar-with-dependencies.jar 127.0.0.1 9002 2553 127.0.0.1:2552
 
 # API (json based)
 ## Blockchain
