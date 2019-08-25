@@ -4,6 +4,7 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{ImplicitSender, TestKit}
 import blockchain.Chain
 import blockchain.api._
+import blockchain.api.actors.BlockchainActor.ChainValidity
 import blockchain.core.{Block, Blockchain}
 import blockchain.protocols.ProofOfWork
 import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
@@ -36,10 +37,10 @@ class BlockchainActorTest extends TestKit(ActorSystem("test")) with ImplicitSend
   }
   it should "return if its valid" in {
     blockchainActor ! BlockchainActor.IsChainValid
-    val valid = receiveOne(askTimeout.duration).asInstanceOf[Boolean]
-    assert(valid)
+    val validity = receiveOne(askTimeout.duration).asInstanceOf[ChainValidity]
+    assert(validity.isChainValid)
   }
-  it should "replace its out chain" in {
+  it should "replace its own chain" in {
     val newChain = new Blockchain(new ProofOfWork(3)).getBlockchain
 
     blockchainActor ! BlockchainActor.ReplaceChain(newChain)

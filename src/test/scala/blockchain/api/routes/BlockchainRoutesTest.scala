@@ -4,7 +4,7 @@ import akka.actor.ActorRef
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import blockchain.api.actors.BlockchainActor
 import org.scalatest.{FlatSpecLike, Matchers}
-import spray.json.{JsArray, JsObject, JsString}
+import spray.json.{JsArray, JsBoolean, JsObject, JsString}
 
 class BlockchainRoutesTest extends FlatSpecLike with Matchers with ScalatestRouteTest with BlockchainRoutes {
 
@@ -18,7 +18,8 @@ class BlockchainRoutesTest extends FlatSpecLike with Matchers with ScalatestRout
   }
   it should "return if it is valid" in {
     Get("/blockchain/valid") ~> blockchainRoutes ~> check {
-      responseAs[String] shouldEqual "true"
+      val validity = responseAs[JsObject]
+      assert(validity.getFields("isChainValid").head.asInstanceOf[JsBoolean].value)
     }
   }
   it should "add and mine new block" in {

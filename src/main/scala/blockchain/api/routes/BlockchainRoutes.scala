@@ -8,15 +8,17 @@ import akka.pattern.ask
 import blockchain.Chain
 import blockchain.api._
 import blockchain.api.actors.BlockchainActor
+import blockchain.api.actors.BlockchainActor.ChainValidity
 import blockchain.core.Block
 import blockchain.json.JsonSupport
-import spray.json._
 
 import scala.concurrent.Future
 
 trait BlockchainRoutes extends JsonSupport {
 
   implicit def system: ActorSystem
+
+  import spray.json._
 
   lazy val blockchainRoutes: Route =
     pathPrefix("blockchain") {
@@ -32,7 +34,7 @@ trait BlockchainRoutes extends JsonSupport {
         path("valid") {
           get {
             val validFuture = blockchain ? BlockchainActor.IsChainValid
-            onSuccess(validFuture.mapTo[Boolean]) { validity =>
+            onSuccess(validFuture.mapTo[ChainValidity]) { validity =>
               complete(StatusCodes.OK, validity.toJson)
             }
           }

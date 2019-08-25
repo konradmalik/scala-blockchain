@@ -4,6 +4,7 @@ import akka.actor.ActorRef
 import akka.remote.testkit.MultiNodeSpec
 import akka.testkit.ImplicitSender
 import akka.util.Timeout
+import blockchain.api.actors.BlockchainClusterListener.ChainRefreshed
 import blockchain.api.actors.Supervisor.InitializedBlockchain
 import blockchain.api.actors.{BlockchainActor, BlockchainClusterListener, Supervisor}
 import blockchain.core.Block
@@ -71,14 +72,14 @@ class BlockchainClusterRoutesTest extends MultiNodeSpec(BlockchainMultiNodeConfi
       runOn(node2) {
         val blockchainClusterListener = system.actorSelection(node(node2) / "user" / "blockchainClusterListener")
         blockchainClusterListener ! BlockchainClusterListener.RefreshChain
-        val maxLength = receiveOne(askTimeout.duration).asInstanceOf[Int]
+        val oneChainRefreshed = receiveOne(askTimeout.duration).asInstanceOf[ChainRefreshed]
         val blockchain = system.actorSelection(node(node2) / "user" / "supervisor" / "blockchain")
 
         Thread.sleep(askTimeout.duration._1 * 1000 / 2)
 
         blockchain ! BlockchainActor.GetLength
         val newLength = receiveOne(askTimeout.duration).asInstanceOf[Int]
-        assert(newLength == maxLength)
+        assert(oneChainRefreshed.newLength == newLength)
       }
 
     }

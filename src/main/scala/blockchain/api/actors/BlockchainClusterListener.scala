@@ -1,11 +1,13 @@
 package blockchain.api.actors
 
+import java.time.Instant
+
 import akka.actor.{Actor, ActorLogging, ActorRef, Address, AddressFromURIString, Props}
 import akka.cluster.ClusterEvent._
 import akka.cluster.{Cluster, MemberStatus}
 import akka.pattern.ask
 import blockchain.Chain
-import blockchain.api.actors.BlockchainClusterListener.{GetNodes, RefreshChain}
+import blockchain.api.actors.BlockchainClusterListener.{ChainRefreshed, GetNodes, RefreshChain}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
@@ -21,6 +23,8 @@ object BlockchainClusterListener {
   final case object GetNodes
 
   final case object RefreshChain
+
+  final case class ChainRefreshed(timestamp: Instant, newLength: Int)
 
 }
 
@@ -79,7 +83,7 @@ class BlockchainClusterListener(nodeAddress: Option[String]) extends Actor with 
 
   private def markFutureToPrintException(f: Future[_]) = f.recover { case e: Exception => e.printStackTrace() }
 
-  def refreshChain: Int = {
+  def refreshChain: ChainRefreshed = {
     val setOfFutures: Set[Future[ActorRef]] = nodes.map(a => context.actorSelection(s"${a.toString}/user/$SUPERVISOR_ACTOR_NAME/$BLOCKCHAIN_ACTOR_NAME").resolveOne())
     setOfFutures.foreach(markFutureToPrintException)
     val futureSetOfBlockchainNodes: Future[Iterable[ActorRef]] = futuresToFuture(setOfFutures)
@@ -92,7 +96,7 @@ class BlockchainClusterListener(nodeAddress: Option[String]) extends Actor with 
     val futureLongestActor: Future[(ActorRef, Int)] = futureSetOfChainLengths.map(_.head)
     markFutureToPrintException(futureLongestActor)
     if (nodes.size == 1) {
-      Await.result(futureLongestActor, selectionTimeout)._2
+      ChainRefreshed(Instant.now(), Await.result(futureLongestActor, selectionTimeout)._2)
     } else {
       // get chain from longest actor
       val futureLongestChain: Future[Chain] = futureLongestActor
@@ -132,7 +136,7 @@ class BlockchainClusterListener(nodeAddress: Option[String]) extends Actor with 
       futureFailedUpdates.map(_.foreach(p => {
         cluster.leave(p._1.path.address)
       }))
-      Await.result(futureLongestChainLength, selectionTimeout)
+      ChainRefreshed(Instant.now(),Await.result(futureLongestChainLength, selectionTimeout))
     }
   }
 

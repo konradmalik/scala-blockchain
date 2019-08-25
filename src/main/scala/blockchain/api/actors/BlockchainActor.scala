@@ -1,5 +1,7 @@
 package blockchain.api.actors
 
+import java.time.Instant
+
 import akka.actor.{Actor, ActorLogging, Props}
 import blockchain.Chain
 import blockchain.api.ErrorMsg
@@ -18,6 +20,8 @@ object BlockchainActor {
 
   final case object GetLastBlock
 
+  final case class ChainValidity(timestamp: Instant, isChainValid: Boolean)
+
   final case class MakeNewBlock(data: String)
 
   final case class ReplaceChain(newChain: Chain)
@@ -33,7 +37,7 @@ class BlockchainActor(proof: ProofProtocol) extends Blockchain(proof) with Actor
     case GetLength => sender() ! length
     case GetChain => sender() ! this.getBlockchain
     case GetLastBlock => sender() ! getLastBlock
-    case IsChainValid => sender() ! isChainValid
+    case IsChainValid => sender() ! ChainValidity(Instant.now(), isChainValid)
     case ReplaceChain(newChain) =>
       log.info(s"Replacing chain; old: ${this.length}, new: ${newChain.length}")
       val ifReplaced: Boolean = this.replaceBlockchain(newChain)
